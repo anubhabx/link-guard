@@ -20,8 +20,7 @@ class FileScanner:
         """
         Recursively scan directory for supported files.
         
-        Returns:
-            List of Path objects for files to scan
+        Returns: List of Path objects for files to scan
         """
         
         files_to_scan = []
