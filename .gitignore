@@ -79,6 +79,7 @@ Desktop.ini
 # GitHub specific (you can keep .github for Actions/configs)
 # Remove this line if you want to version .github folder
 # .github/
+.github/copilot-instructions.md
 
 # Documentation builds
 docs/_build/
