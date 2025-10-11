@@ -1,4 +1,0 @@
-aiohttp
-rich
-beautifulsoup4
-typer
