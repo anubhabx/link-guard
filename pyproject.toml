@@ -3,7 +3,7 @@ requires = ["setuptools >= 68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "linkgaurd"
+name = "linkguard"
 version = "0.2.0"
 description = "CLI tool for detecting broken links and localhost URLs in project files"
 readme = "README.md"
@@ -59,14 +59,14 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/anubhabx/link-gaurd"
-Documentation = "https://github.com/anubhabx/link-gaurd#readme"
-Repository = "https://github.com/anubhabx/link-gaurd"
-Issues = "https://github.com/anubhabx/link-gaurd/issues"
-Changelog = "https://github.com/anubhabx/link-gaurd/releases"
+Homepage = "https://github.com/anubhabx/link-guard"
+Documentation = "https://github.com/anubhabx/link-guard#readme"
+Repository = "https://github.com/anubhabx/link-guard"
+Issues = "https://github.com/anubhabx/link-guard/issues"
+Changelog = "https://github.com/anubhabx/link-guard/releases"
 
 [project.scripts]
-linkguard = "linkgaurd.cli:main"
+linkguard = "linkguard.cli:main"
 
 # Tool Configurations
 [tool.black]
@@ -93,7 +93,7 @@ python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=linkgaurd",
+    "--cov=linkguard",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -104,7 +104,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["linkgaurd"]
+source = ["linkguard"]
 omit = [
     "*/tests/*",
     "*/__pycache__/*",
@@ -141,7 +141,7 @@ module = "tests.*"
 disallow_untyped_defs = false
 
 [tool.setuptools]
-packages = ["linkgaurd", "linkgaurd.scanner", "linkgaurd.reporter", "linkgaurd.utils"]
+packages = ["linkguard", "linkguard.scanner", "linkguard.reporter", "linkguard.utils"]
 
 [tool.setuptools.package-data]
-linkgaurd = ["py.typed"]
+linkguard = ["py.typed"]

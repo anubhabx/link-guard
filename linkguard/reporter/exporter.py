@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
-from linkgaurd.scanner.link_checker import LinkResult
-from linkgaurd.scanner.rules import RuleViolation
+from linkguard.scanner.link_checker import LinkResult
+from linkguard.scanner.rules import RuleViolation
 
 
 class Exporter:
@@ -138,7 +138,7 @@ class Exporter:
         working = [r for r in results if not r.is_broken]
 
         lines = [
-            "# LinkGaurd Scan Report\n",
+            "# Linkguard Scan Report\n",
             "",
             f"**Generated on:** {datetime.now().isoformat()}",
             "",

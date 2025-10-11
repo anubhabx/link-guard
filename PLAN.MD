@@ -38,13 +38,13 @@ pytest tests/ -v
 # 3. Make your changes to code
 
 # 4. Run tests again to verify
-pytest tests/ -v --cov=linkgaurd
+pytest tests/ -v --cov=linkguard
 
 # 5. Format code
-black linkgaurd/ tests/
+black linkguard/ tests/
 
 # 6. Check code quality
-flake8 linkgaurd/
+flake8 linkguard/
 
 # 7. Commit changes
 git add .

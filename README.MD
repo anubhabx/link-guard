@@ -28,8 +28,8 @@ LinkGuard is a fast, async Python CLI tool that scans your project files for bro
 
 ```bash
 # Clone the repository
-git clone https://github.com/anubhabx/link-gaurd.git
-cd link-gaurd
+git clone https://github.com/anubhabx/link-guard.git
+cd link-guard
 
 # Create virtual environment
 python -m venv venv
@@ -63,7 +63,7 @@ linkguard --export report.json
 linkguard --timeout 15
 ```
 
-> **💡 Tip**: After installation with `pip install -e ".[dev]"`, you can use `linkguard` directly instead of `python -m linkgaurd.cli`
+> **💡 Tip**: After installation with `pip install -e ".[dev]"`, you can use `linkguard` directly instead of `python -m linkguard.cli`
 
 ---
 
@@ -248,7 +248,7 @@ LinkGuard automatically detects and extracts URLs from:
 ### Project Structure
 
 ```
-linkgaurd/
+linkguard/
 ├── cli.py                    # CLI entry point & main command
 ├── scanner/
 │   ├── file_scanner.py       # Recursive file discovery
@@ -267,8 +267,8 @@ linkgaurd/
 
 ```bash
 # Clone and navigate
-git clone https://github.com/anubhabx/link-gaurd.git
-cd link-gaurd
+git clone https://github.com/anubhabx/link-guard.git
+cd link-guard
 
 # Create virtual environment
 python -m venv venv
@@ -289,7 +289,7 @@ linkguard --help
 pytest tests/ -v
 
 # Run with coverage
-pytest tests/ --cov=linkgaurd --cov-report=html
+pytest tests/ --cov=linkguard --cov-report=html
 
 # Run specific test file
 pytest tests/test_scanner.py -v
@@ -302,16 +302,16 @@ pytest tests/test_checker.py --asyncio-mode=auto
 
 ```bash
 # Format code with black
-black linkgaurd/ tests/
+black linkguard/ tests/
 
 # Lint with flake8
-flake8 linkgaurd/
+flake8 linkguard/
 
 # Type checking with mypy
-mypy linkgaurd/
+mypy linkguard/
 
 # Run all quality checks
-black linkgaurd/ && flake8 linkgaurd/ && mypy linkgaurd/
+black linkguard/ && flake8 linkguard/ && mypy linkguard/
 ```
 
 ---
@@ -329,7 +329,7 @@ We welcome contributions! Whether it's:
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/link-gaurd.git
+   git clone https://github.com/YOUR_USERNAME/link-guard.git
    ```
 
 2. **Create a feature branch**
@@ -460,7 +460,7 @@ LinkGuard is designed for speed and efficiency:
 
 **Q: Command not found: `linkguard`**
 - Install package first: `pip install -e ".[dev]"`
-- Or use: `python -m linkgaurd.cli` instead
+- Or use: `python -m linkguard.cli` instead
 
 **Q: How do I use this in CI/CD?**
 ```yaml
@@ -470,7 +470,7 @@ steps:
     with:
       python-version: '3.10'
   - run: |
-      cd link-gaurd
+      cd link-guard
       pip install -e ".[dev]"
       linkguard --mode prod --export report.json
 ```
@@ -492,15 +492,15 @@ Built with amazing open-source tools:
 - [rich](https://rich.readthedocs.io/) - Beautiful terminal formatting
 - [beautifulsoup4](https://www.crummy.com/software/BeautifulSoup/) - HTML parsing made easy
 
-Special thanks to all [contributors](https://github.com/anubhabx/link-gaurd/graphs/contributors)! 🎉
+Special thanks to all [contributors](https://github.com/anubhabx/link-guard/graphs/contributors)! 🎉
 
 ---
 
 ## 📞 Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/anubhabx/link-gaurd/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/anubhabx/link-gaurd/discussions)
-- 💡 **Feature Requests**: [Open an Issue](https://github.com/anubhabx/link-gaurd/issues/new)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/anubhabx/link-guard/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/anubhabx/link-guard/discussions)
+- 💡 **Feature Requests**: [Open an Issue](https://github.com/anubhabx/link-guard/issues/new)
 - 📧 **Email**: anubhabxdev@gmail.com
 
 ---
@@ -511,7 +511,7 @@ If you find LinkGuard useful, please consider giving it a star! ⭐
 
 It helps others discover the project and motivates continued development.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=anubhabx/link-gaurd&type=Date)](https://star-history.com/#anubhabx/link-gaurd&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=anubhabx/link-guard&type=Date)](https://star-history.com/#anubhabx/link-guard&Date)
 
 ---
 

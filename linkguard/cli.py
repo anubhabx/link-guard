@@ -5,14 +5,14 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from pathlib import Path
 
-from linkgaurd.scanner.file_scanner import FileScanner
-from linkgaurd.scanner.url_extractor import URLExtractor
-from linkgaurd.scanner.link_checker import LinkChecker
-from linkgaurd.scanner.rules import EnvironmentRules
-from linkgaurd.reporter.exporter import Exporter
+from linkguard.scanner.file_scanner import FileScanner
+from linkguard.scanner.url_extractor import URLExtractor
+from linkguard.scanner.link_checker import LinkChecker
+from linkguard.scanner.rules import EnvironmentRules
+from linkguard.reporter.exporter import Exporter
 
 app = typer.Typer(
-    name="linkgaurd",
+    name="linkguard",
     help="CLI tool for detecting broken links and localhost URLs in "
     "project files",
 )
