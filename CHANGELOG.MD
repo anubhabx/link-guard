@@ -9,12 +9,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### To Be Added in v0.3.0
-- Unit tests for all scanner modules
-- Integration tests with real fixtures
-- Logger implementation in `utils/logger.py`
-- GitHub Actions CI/CD workflow
+### To Be Added in v0.4.0
+- GitHub Actions CI/CD workflow with multi-OS/Python version testing
+- Integration tests for CLI module (subprocess-based)
 - Pre-commit hooks template
+- Coverage upload to Codecov
+- Linting integration (Black, flake8, mypy in CI)
+
+---
+
+## [0.3.0] - 2025-10-12
+
+### Added
+- **Comprehensive Test Suite (70 tests, 71% coverage)**
+  - Scanner tests (13 tests): File discovery, ignore patterns, hidden files
+  - URL Extractor tests (16 tests): Markdown, HTML, JSON, JS/TS extraction
+  - Link Checker tests (7 tests): Async HTTP validation with mocking
+  - Configuration tests (14 tests): Config loading, precedence, ignore files
+  - Logger tests (5 tests): Rich logging implementation
+  - Environment Rules tests (8 tests): Localhost, private IPs, dev domains
+  - Exporter tests (9 tests): JSON, CSV, Markdown export validation
+
+- **Logger Implementation (`utils/logger.py`)**
+  - Rich logging with color-coded output
+  - Debug/Info/Error levels with proper formatting
+  - Verbose mode support via `--verbose` flag
+  - Module-specific logger instances
+
+- **Test Infrastructure**
+  - pytest configuration with async support
+  - pytest-asyncio for async test execution
+  - pytest-cov for coverage reporting (HTML, XML, terminal)
+  - Comprehensive fixtures and mock utilities
+  - AsyncMock for HTTP response mocking
+
+### Changed
+- Improved async result ordering in link checker tests
+- Enhanced path matching for directory detection in file scanner
+- Updated hidden file filtering logic
+
+### Fixed
+- Missing `assert` statement in link_checker dataclass test
+- Async ordering issue in multi-URL test cases
+- Path pattern matching for nested directories
+- Hidden file filtering (files starting with `.`)
+
+### Test Coverage by Module
+- `file_scanner.py`: 100% (26 statements)
+- `url_extractor.py`: 100% (74 statements)
+- `rules.py`: 100% (29 statements)
+- `exporter.py`: 100% (48 statements)
+- `logger.py`: 100% (13 statements)
+- `config.py`: 89% (91 statements, 10 missed)
+- `link_checker.py`: 78% (67 statements, 15 missed)
+- `cli.py`: 0% (108 statements - integration tests deferred to v0.4.0)
+- **Overall**: 71% coverage (456 statements, 133 missed)
 
 ---
 
@@ -126,6 +175,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version Comparison
 
+**[0.3.0] vs [0.2.0]**
+- Added 70 comprehensive tests (7 test modules)
+- Added Logger implementation with Rich integration
+- Achieved 71% test coverage (100% on 5 core modules)
+- Added test infrastructure (pytest-asyncio, fixtures, mocking)
+- Fixed hidden file filtering and path matching bugs
+
 **[0.2.0] vs [0.1.0]**
 - Added complete configuration system (JSON + ignore file)
 - Added 3 export formats (JSON, CSV, Markdown)
@@ -136,14 +192,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Lines of Code:**
 - v0.1.0: ~450 lines
 - v0.2.0: ~710 lines (+58% growth)
+- v0.3.0: ~1,300 lines (+83% growth from v0.2.0)
 
 **Test Coverage:**
 - v0.1.0: 0%
 - v0.2.0: 0% (infrastructure ready, tests pending)
+- v0.3.0: 71% (70 tests, 100% pass rate)
 
 ---
 
-[Unreleased]: https://github.com/anubhabx/link-guard/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/anubhabx/link-guard/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/anubhabx/link-guard/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/anubhabx/link-guard/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/anubhabx/link-guard/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/anubhabx/link-guard/releases/tag/v0.0.1

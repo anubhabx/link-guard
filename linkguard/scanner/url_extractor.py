@@ -100,9 +100,7 @@ class URLExtractor:
         # Extract from <a href="">
         for tag in soup.find_all("a", href=True):
             url = tag.get("href")
-            if isinstance(url, str) and url.startswith(
-                ("http://", "https://")
-            ):
+            if isinstance(url, str) and url.startswith(("http://", "https://")):
                 urls.append(
                     {
                         "url": url,
@@ -115,9 +113,7 @@ class URLExtractor:
         for tag in soup.find_all(["img", "link", "script"]):
             url = tag.get("src") or tag.get("href")
 
-            if isinstance(url, str) and url.startswith(
-                ("http://", "https://")
-            ):
+            if isinstance(url, str) and url.startswith(("http://", "https://")):
                 urls.append(
                     {
                         "url": url,
@@ -142,9 +138,7 @@ class URLExtractor:
 
         return urls
 
-    def _search_json_for_urls(
-        self, obj, urls: List[Dict[str, Any]], path: str = ""
-    ):
+    def _search_json_for_urls(self, obj, urls: List[Dict[str, Any]], path: str = ""):
         """Recursively search JSON object for URL strings."""
         if isinstance(obj, dict):
             for key, value in obj.items():

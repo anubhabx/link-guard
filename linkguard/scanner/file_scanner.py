@@ -22,51 +22,48 @@ class FileScanner:
         ".git",
         ".venv",
         "node_modules",
-        "__pychache__",
+        "__pycache__",
         ".pytest_cache",
         ".idea",
         "dist",
         "build",
     }
 
-    def __init__(
-        self, root_dir: Path, ignore_patterns: Optional[Set[str]] = None
-    ):
-        self.root_dir = root_dir
-        self.ignore_patterns = ignore_patterns or self.DEFAULT_IGNORE_PATTERNS
+    def __init__(self, root_dir: Path, ignore_patterns: Optional[Set[str]] = None):
+        self.root_dir = Path(root_dir)
+        self.ignore_patterns = ignore_patterns or set()
+        # Merge with default patterns
+        self.ignore_patterns.update(self.DEFAULT_IGNORE_PATTERNS)
 
     def scan(self) -> List[Path]:
         """
-        Recursively scan directory for supported files.
+        Recursively scan the root directory for supported files.
 
-        Returns: List of Path objects for files to scan
+        Returns:
+            List[Path]: List of file paths to check for URLs
         """
-
-        files_to_scan = []
+        discovered_files = []
 
         for file_path in self.root_dir.rglob("*"):
-            # Skip Directories
-            if file_path.is_dir():
-                continue
+            if file_path.is_file():
+                # Check if file has supported extension
+                if file_path.suffix in self.SUPPORTED_EXTENSIONS:
+                    # Skip if matches ignore patterns
+                    if not self._should_ignore(file_path):
+                        # Skip hidden files (starting with .)
+                        if not file_path.name.startswith("."):
+                            discovered_files.append(file_path)
 
-            # Skip in ignored directory
-            if self._should_ignore(file_path):
-                continue
-
-            # Only include supported file types
-            if file_path.suffix.lower() in self.SUPPORTED_EXTENSIONS:
-                files_to_scan.append(file_path)
-
-        return files_to_scan
+        return discovered_files
 
     def _should_ignore(self, file_path: Path) -> bool:
         """Check if file is in an ignored directory."""
-        # Check each part of the path against ignore patterns
-        for part in file_path.parts:
-            if part in self.ignore_patterns:
-                return True
-            # Also check wildcard patterns
-            for pattern in self.ignore_patterns:
+        parts = file_path.parts
+
+        for pattern in self.ignore_patterns:
+            # Check if any part of the path matches the ignore pattern
+            for part in parts:
                 if fnmatch.fnmatch(part, pattern):
                     return True
+
         return False

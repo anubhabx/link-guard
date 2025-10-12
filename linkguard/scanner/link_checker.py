@@ -1,7 +1,8 @@
 import asyncio
 import aiohttp
-from typing import List, Dict, Any, Optional, Callable
+from typing import Sequence, Dict, Any, Optional, Callable, Tuple, Union
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -9,12 +10,12 @@ class LinkResult:
     """Result of checking a single link."""
 
     url: str
-    status_code: int | None
+    status_code: Optional[int]
     is_broken: bool
-    error: str | None
+    error: Optional[str]
     response_time: float
     file_path: str
-    line_number: int | None
+    line_number: Optional[int]
 
 
 class LinkChecker:
@@ -28,7 +29,7 @@ class LinkChecker:
         ),
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate",  
+        "Accept-Encoding": "gzip, deflate",
         "DNT": "1",
         "Connection": "keep-alive",
         "Upgrade-Insecure-Requests": "1",
@@ -44,23 +45,23 @@ class LinkChecker:
         self.max_concurrent = max_concurrent
 
     async def check_links(
-        self, 
-        url_data: List[tuple], 
-        progress_callback: Optional[Callable[[int], None]] = None
-    ) -> List[LinkResult]:
+        self,
+        url_data: Sequence[Tuple[Union[Path, str], Dict[str, Any]]],
+        progress_callback: Optional[Callable[[int], None]] = None,
+    ) -> list[LinkResult]:
         """
         Check a list of URLs concurrently.
 
         Args:
-            url_data (List[tuple]): List of tuples containing (file_path, url_info).
+            url_data: List of tuples containing (file_path, url_info).
             progress_callback: Callback function to report progress
 
         Returns:
-            List[LinkResult]: List of results for each URL checked.
+            list[LinkResult]: List of results for each URL checked.
         """
 
         semaphore = asyncio.Semaphore(self.max_concurrent)
-        results = []
+        results: list[LinkResult] = []
         completed = 0
 
         # Create TCP connector
@@ -80,17 +81,16 @@ class LinkChecker:
                 self._check_one_link(session, semaphore, file_path, url_info)
                 for file_path, url_info in url_data
             ]
-            
+
             # Process tasks as they complete to provide progress updates
             for coro in asyncio.as_completed(tasks):
                 try:
                     result = await coro
-                    if isinstance(result, LinkResult):
-                        results.append(result)
+                    results.append(result)
                     completed += 1
                     if progress_callback:
                         progress_callback(completed)
-                except Exception as e:
+                except Exception:
                     # Handle unexpected exceptions
                     completed += 1
                     if progress_callback:
@@ -102,16 +102,16 @@ class LinkChecker:
         self,
         session: aiohttp.ClientSession,
         semaphore: asyncio.Semaphore,
-        file_path: str,
+        file_path: Union[Path, str],
         url_info: Dict[str, Any],
     ) -> LinkResult:
         """Check a single URL and return Results
 
         Args:
-            session (aiohttp.ClientSession): Session Client
-            semaphore (asyncio.Semaphore): Semaphore for concurrency control
-            file_path (str): File path where URL was found
-            url_info (Dict[str, Any]): URL info dictionary
+            session: Session Client
+            semaphore: Semaphore for concurrency control
+            file_path: File path where URL was found
+            url_info: URL info dictionary
 
         Returns:
             LinkResult: Result of the single URL check
@@ -128,9 +128,7 @@ class LinkChecker:
                     url,
                     allow_redirects=True,
                 ) as response:
-                    response_time = (
-                        asyncio.get_event_loop().time() - start_time
-                    )
+                    response_time = asyncio.get_event_loop().time() - start_time
 
                     # Some servers return 403/405 for HEAD but work with GET
                     # If HEAD fails with 4xx, try GET as fallback
@@ -151,9 +149,7 @@ class LinkChecker:
 
             except (aiohttp.ClientError, asyncio.TimeoutError):
                 # If HEAD request fails, try GET as fallback
-                return await self._check_with_get(
-                    session, url, file_path, url_info, start_time
-                )
+                return await self._check_with_get(session, url, file_path, url_info, start_time)
 
             except Exception as e:
                 response_time = asyncio.get_event_loop().time() - start_time
@@ -171,7 +167,7 @@ class LinkChecker:
         self,
         session: aiohttp.ClientSession,
         url: str,
-        file_path: str,
+        file_path: Union[Path, str],
         url_info: Dict[str, Any],
         start_time: float,
     ) -> LinkResult:

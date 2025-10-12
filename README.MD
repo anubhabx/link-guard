@@ -6,6 +6,7 @@ LinkGuard is a fast, async Python CLI tool that scans your project files for bro
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Test Coverage](https://img.shields.io/badge/coverage-71%25-brightgreen.svg)](reports/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
@@ -19,6 +20,7 @@ LinkGuard is a fast, async Python CLI tool that scans your project files for bro
 - 🔍 **Smart URL Extraction**: Supports Markdown, HTML, JSON, and plain text files
 - ⚙️ **Zero Config**: Works out of the box with sensible defaults
 - 🛠️ **Highly Configurable**: `.linkguardignore` and `linkguard.config.json` support
+- ✅ **Well-Tested**: 70 comprehensive tests with 71% code coverage
 
 ---
 

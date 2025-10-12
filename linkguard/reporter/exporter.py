@@ -193,9 +193,7 @@ class Exporter:
             )
 
             for r in broken:
-                time_str = (
-                    f"{r.response_time:.2f}" if r.response_time else "N/A"
-                )
+                time_str = f"{r.response_time:.2f}" if r.response_time else "N/A"
                 lines.append(
                     f"| {r.url} | {r.status_code or 'N/A'} | "
                     f"{r.error or 'N/A'} | {time_str} | "
@@ -215,9 +213,7 @@ class Exporter:
             )
 
             for r in working:
-                time_str = (
-                    f"{r.response_time:.2f}" if r.response_time else "N/A"
-                )
+                time_str = f"{r.response_time:.2f}" if r.response_time else "N/A"
                 lines.append(
                     f"| {r.url} | {r.status_code or 'N/A'} | "
                     f"{time_str} | {r.file_path} | "
