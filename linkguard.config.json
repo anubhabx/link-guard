@@ -1,0 +1,15 @@
+{
+  "mode": "dev",
+  "timeout": 10,
+  "concurrency": 50,
+  "ignore_patterns": [
+    "node_modules",
+    ".git",
+    "*.pyc"
+  ],
+  "exclude_urls": [
+    "http://example.com/*",
+    "https://private-api.internal/*"
+  ],
+  "strict_ssl": false
+}

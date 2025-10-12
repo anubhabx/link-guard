@@ -19,11 +19,11 @@
 - ⬜ Set up pre-commit hooks
 
 ### Utilities & Configuration
-- ⬜ Implement `utils/logger.py` with structured logging (DEBUG/INFO/ERROR levels)
-- ⬜ Implement `utils/config.py` for loading `.linkguardignore`
-- ⬜ Add support for `linkguard.config.json` parsing
-- ⬜ Implement configuration precedence (CLI → config file → defaults)
-- ⬜ Add `.linkguardignore` pattern matching (gitignore-style)
+- ⬜ Implement `utils/logger.py` with structured logging (DEBUG/INFO/ERROR levels) - **File created but empty**
+- ✅ Implement `utils/config.py` for loading `.linkguardignore`
+- ✅ Add support for `linkguard.config.json` parsing
+- ✅ Implement configuration precedence (CLI → config file → defaults)
+- ✅ Add `.linkguardignore` pattern matching (gitignore-style) - **Config parsing complete, need file integration test**
 
 ---
 
@@ -73,9 +73,9 @@
 ## 📊 Phase 4: Reporting & Output
 
 ### Console Output
-- ✅ Implement Rich console formatter in `reporter/formatter.py`
+- ✅ Implement Rich console formatter in `cli.py` (integrated, `formatter.py` empty)
 - ✅ Add progress bar for scanning files
-- ✅ Add progress bar for checking links
+- ✅ Add progress bar for checking links with real-time updates
 - ✅ Display real-time link validation results
 - ✅ Show summary statistics (total, valid, broken, warnings)
 - ✅ Color-code output (green=valid, red=broken, yellow=warning)
@@ -87,7 +87,7 @@
 - ✅ Implement Markdown export
 - ✅ Add structured export schema (file, url, status, line, message)
 - ✅ Support custom export file paths (`--export report.json`)
-- ✅ Generate timestamped reports
+- ✅ Generate timestamped reports with metadata
 
 ---
 
@@ -98,43 +98,43 @@
 - ✅ Add `scan <directory>` command
 - ✅ Add `--mode` option (dev/prod)
 - ✅ Add `--export` option for output file
-- ⬜ Add `--ignore` option for runtime exclusions
+- ✅ Add `--ignore` option for runtime exclusions (comma-separated)
 - ✅ Add `--timeout` option for request timeout
-- ⬜ Add `--concurrency` option for parallel requests
-- ⬜ Add `--verbose` flag for detailed logging
+- ✅ Add `--concurrency` option for parallel requests
+- ✅ Add `--verbose` flag for detailed logging
 - ⬜ Add `--version` command
 - ✅ Add `--help` documentation for all commands
 
 ### Exit Codes
 - ✅ Return 0 on success (no broken links)
 - ✅ Return 1 on broken links found
-- ⬜ Return 2 on configuration errors
-- ⬜ Return 3 on dev URLs in production mode
+- ✅ Return 2 on configuration errors
+- ⬜ Return 3 on dev URLs in production mode (currently exits with code 1)
 
 ---
 
 ## 🧪 Phase 6: Testing
 
 ### Unit Tests
-- ⬜ Test file scanner with mock file system in `tests/test_scanner.py`
+- ⬜ Test file scanner with mock file system in `tests/test_scanner.py` - **File exists but empty**
 - ⬜ Test URL extraction for each file type
 - ⬜ Test `.linkguardignore` pattern matching
-- ⬜ Test async link checker with mocked HTTP responses in `tests/test_checker.py`
+- ⬜ Test async link checker with mocked HTTP responses in `tests/test_checker.py` - **File exists but empty**
 - ⬜ Test environment rule detection
 - ⬜ Test configuration loading and precedence
 - ⬜ Test reporter output formatting
 
 ### Integration Tests
-- ⬜ Create test fixtures with sample files (`data/` directory)
+- ✅ Create test fixtures with sample files (`data/sample.html` exists)
 - ⬜ Test end-to-end scan workflow
 - ⬜ Test CLI commands with various options
 - ⬜ Test export functionality
 - ⬜ Achieve 85%+ test coverage
 
 ### Test Infrastructure
-- ⬜ Set up pytest with async support (`pytest-asyncio`)
+- ✅ Set up pytest with async support (`pytest-asyncio`) - **Configured in pyproject.toml**
 - ⬜ Configure pytest fixtures
-- ⬜ Add coverage reporting
+- ✅ Add coverage reporting - **Configured in pyproject.toml**
 - ⬜ Create GitHub Actions CI workflow
 
 ---
@@ -165,34 +165,11 @@
 
 ---
 
-## 🚀 Phase 8: Advanced Features (Future)
+## 🚀 Phase 8: Advanced Features (Future v2.0)
 
-### Performance Optimization
-- 💡 Implement local cache for verified links (`cache.py`)
-- 💡 Add cache expiration policies (TTL-based)
-- 💡 Support cache clearing command
-- 💡 Add benchmark tests for performance
-
-### Enhanced Validation
-- 💡 Check for HTTPS vs HTTP security issues
-- 💡 Detect redirect chains and loops
-- 💡 Validate anchor links (#fragments)
-- 💡 Check for robots.txt restrictions
-- 💡 Implement rate limiting per domain
-
-### Smart Features
-- 💡 Suggest link replacements for broken URLs
-- 💡 Integrate with sitemap.xml for validation
-- 💡 AI-powered content validation mode
-- 💡 Historical link tracking and analytics
-
-### Integration & Automation
-- 💡 Git hook integration (pre-commit/pre-push)
-- 💡 GitHub Actions workflow template
-- 💡 VS Code extension
-- 💡 Web dashboard for link health visualization
-- 💡 API mode for programmatic access
-- 💡 Webhook notifications for broken links
+- 💡 **Browser Mode**: Playwright integration for sites with bot protection
+- 💡 **Trusted Domains**: Whitelist for known-strict sites (pexels.com, etc.)
+- 💡 **Smart Retry**: Exponential backoff for rate-limited sites
 
 ---
 
@@ -210,32 +187,42 @@
 
 ## 🔄 Version Milestones
 
-- **v0.1.0**: Core scanning + basic validation (Phases 1-3) - 🔄 **IN PROGRESS**
-- **v0.2.0**: Rich reporting + CLI interface (Phases 4-5) - ✅ **COMPLETED**
-- **v0.3.0**: Testing + CI/CD (Phase 6) - ⬜ **NOT STARTED**
+- **v0.1.0**: Core scanning + basic validation (Phases 1-3) - ✅ **COMPLETED**
+- **v0.2.0**: Rich reporting + CLI interface (Phases 4-5) - ✅ **COMPLETED** (Missing: logger.py, test files)
+- **v0.3.0**: Testing + CI/CD (Phase 6) - 🔄 **NEXT UP** (Test infrastructure configured, need test implementation)
 - **v1.0.0**: Full package release (Phase 7) - ⬜ **NOT STARTED**
 - **v2.0.0**: Advanced features (Phase 8) - 💡 **FUTURE**
 
 ---
 
-## 🎯 Current Sprint Focus
+## 🎯 Current Sprint Focus (Updated: October 2025)
 
-### Week 1-2: Core Infrastructure Completion
+### ✅ Recently Completed (v0.2.0)
+- [x] Implement `utils/config.py` with full config precedence
+- [x] Add configuration file support (`linkguard.config.json`)
+- [x] Complete all CLI options (mode, export, timeout, concurrency, ignore, verbose)
+- [x] Implement all export formats (JSON, CSV, Markdown)
+- [x] Add Rich progress bars and colored output
+- [x] Configure pytest infrastructure in pyproject.toml
+
+### 🔄 Current Sprint: Testing Foundation (v0.3.0)
 - [ ] Implement `utils/logger.py` with Rich logging
-- [ ] Implement `utils/config.py` for `.linkguardignore`
-- [ ] Add configuration file support (`linkguard.config.json`)
-- [ ] Write unit tests for file scanner
+- [ ] Write unit tests for file scanner (`tests/test_scanner.py`)
 - [ ] Write unit tests for URL extractor
+- [ ] Write async tests for link checker (`tests/test_checker.py`)
+- [ ] Write tests for configuration loading
+- [ ] Test `.linkguardignore` pattern matching
 
-### Week 3-4: Testing & Documentation
-- [ ] Complete unit test coverage
+### 📅 Next Sprint: Test Coverage & CI/CD
+- [ ] Complete unit test coverage (target 85%+)
 - [ ] Write integration tests
-- [ ] Set up pytest configuration
-- [ ] Create comprehensive README
-- [ ] Add usage examples
+- [ ] Create GitHub Actions CI workflow
+- [ ] Add pre-commit hooks template
+- [ ] Performance benchmarks
 
-### Week 5-6: Packaging & Release
-- [ ] Finalize `pyproject.toml`
+### 🚀 Future: v1.0.0 Release
+- [ ] Finalize documentation
+- [ ] Create usage examples and tutorials
 - [ ] Test package installation
 - [ ] Publish to TestPyPI
 - [ ] Publish v1.0.0 to PyPI

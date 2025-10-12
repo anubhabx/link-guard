@@ -1,7 +1,7 @@
 import typer
 import asyncio
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.progress import Progress, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
 from rich.table import Table
 from pathlib import Path
 
@@ -10,6 +10,7 @@ from linkguard.scanner.url_extractor import URLExtractor
 from linkguard.scanner.link_checker import LinkChecker
 from linkguard.scanner.rules import EnvironmentRules
 from linkguard.reporter.exporter import Exporter
+from linkguard.utils.config import load_config
 
 app = typer.Typer(
     name="linkguard",
@@ -38,19 +39,59 @@ def scan(
     timeout: int = typer.Option(
         10, "--timeout", "-t", help="Timeout in seconds for HTTP requests"
     ),
+    concurrency: int = typer.Option(
+        50, "--concurrency", "-c", help="Number of concurrent HTTP requests"
+    ),
     export: str = typer.Option(
         None, "--export", "-e", help="Export results to a JSON file"
     ),
+    ignore: str = typer.Option(
+        None,
+        "--ignore",
+        "-i",
+        help="Comma-separated list of glob patterns to ignore",
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose output"
+    )
 ):
     """
     Scan a directory for broken links and localhost URLS.
     """
+    
+    # Load configuration wiht CLI overrides
+    cli_overrides = {}
+    if mode is not None:
+        cli_overrides["mode"] = mode
+    if timeout is not None:
+        cli_overrides["timeout"] = timeout
+    if concurrency is not None:
+        cli_overrides["concurrency"] = concurrency
+    if ignore is not None:
+        # Split comma-separated patterns and strip whitespace
+        cli_overrides["ignore_patterns"] = [p.strip() for p in ignore.split(",")]
+        
+    try:
+        config = load_config(directory, cli_overrides)
+    except ValueError as e:
+        console.print(f"[bold red]Configuration Error:[/bold red] {e}")
+        raise typer.Exit(code=2)
+    
+    # Get final config values
+    final_mode = config.get("mode", "dev")
+    final_timeout = config.get("timeout", 10)
+    final_concurrency = config.get("concurrency", 10)
 
     console.print(f"[bold blue]🔍 Scanning directory:[/bold blue] {directory}")
-    console.print(f"[dim]Mode: {mode} | Timeout: {timeout}s[/dim]\n")
+    console.print(f"[dim]Mode: {final_mode} | Timeout: {final_timeout}s | Concurrency: {final_concurrency}[/dim]\n")
+    
+    if verbose and config.get_ignore_patterns():
+        console.print(
+            f"[dim]Ignoring patterns: {', '.join(config.get_ignore_patterns())}[/dim]\n"
+        )
 
     # Scan for files
-    scanner = FileScanner(directory)
+    scanner = FileScanner(directory, ignore_patterns=set(config.get_ignore_patterns()))
     files = scanner.scan()
 
     console.print(
@@ -75,7 +116,7 @@ def scan(
         return
 
     # Check environment rules
-    rules = EnvironmentRules(mode=mode)
+    rules = EnvironmentRules(mode=final_mode)
     violations = rules.check_urls(all_urls)
 
     if violations:
@@ -93,19 +134,24 @@ def scan(
         ":globe_showing_europe-africa: [bold blue]Checking links...[/bold blue]\n"
     )
 
-    checker = LinkChecker(timeout=timeout)
+    checker = LinkChecker(timeout=final_timeout)
 
     with Progress(
-        SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
+        BarColumn(complete_style="green", finished_style="bold green"),
+        TaskProgressColumn(text_format_no_percentage="{task.completed}/{task.total}"),
+        TimeRemainingColumn(),
         console=console,
     ) as progress:
         task = progress.add_task(
             f"[cyan]Checking {len(all_urls)} links...[/cyan]",
             total=len(all_urls),
         )
-        results = asyncio.run(checker.check_links(all_urls))
-        progress.update(task, completed=True)
+        
+        def update_progress(completed: int):
+            progress.update(task, completed=completed)
+        
+        results = asyncio.run(checker.check_links(all_urls, update_progress))
 
     # Display Results
     console.print()
@@ -151,8 +197,9 @@ def scan(
 
         metadata = {
             "directory": str(directory),
-            "mode": mode,
-            "timeout": timeout,
+            "mode": final_mode,
+            "timeout": final_timeout,
+            "concurrency": final_concurrency,
             "files_scanned": len(files),
         }
 

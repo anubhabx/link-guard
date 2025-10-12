@@ -329,7 +329,7 @@ We welcome contributions! Whether it's:
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/link-guard.git
+   git clone https://github.com/anubhabx/link-guard.git
    ```
 
 2. **Create a feature branch**
@@ -378,25 +378,26 @@ We welcome contributions! Whether it's:
 
 ## 🗺️ Roadmap
 
-### Current Version: v0.2.0 (In Progress) 🔄
+### Current Version: v0.2.0 ✅ **COMPLETED**
 
 - [x] Core async link validation
 - [x] Environment rules (localhost detection)
 - [x] Rich CLI output with progress bars
 - [x] Export to JSON/CSV/Markdown
 - [x] Beautiful summary tables
-- [ ] Configuration file support
-- [ ] `.linkguardignore` implementation
+- [x] Configuration file support (`linkguard.config.json`)
+- [x] `.linkguardignore` implementation (parser ready)
+- [x] All CLI options (mode, export, timeout, concurrency, ignore, verbose)
 
 ### Upcoming Releases
 
-**v0.3.0 - Testing & Quality** (Target: 2 weeks)
+**v0.3.0 - Testing & Quality** (Next Up - Target: 2 weeks)
+- [ ] Implement `utils/logger.py`
 - [ ] Unit test coverage (85%+)
-- [ ] Integration tests
-- [ ] Configuration file support
-- [ ] `.linkguardignore` implementation
+- [ ] Integration tests with real fixtures
+- [ ] Test configuration precedence
 - [ ] GitHub Actions CI/CD
-- [ ] Pre-commit hooks
+- [ ] Pre-commit hooks template
 
 **v1.0.0 - Production Release** (Target: 6 weeks)
 - [ ] PyPI package publication
@@ -518,3 +519,13 @@ It helps others discover the project and motivates continued development.
 **Made with ❤️ by the open-source community**
 
 *Contributions, issues, and feature requests are welcome!*
+
+### Known Limitations
+
+**Sites with Aggressive Bot Protection**
+Some sites (Pexels, Medium, etc.) may return `403 Forbidden` even for valid links due to bot detection. This is expected behavior - these sites intentionally block automated tools.
+
+**Workarounds:**
+- Use `--exclude-urls` in config to skip specific domains
+- Manually verify these links in a browser
+- Coming in v2.0: Browser automation mode (Playwright)

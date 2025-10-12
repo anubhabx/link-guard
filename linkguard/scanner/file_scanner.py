@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List, Set, Optional
+import fnmatch
 
 
 class FileScanner:
@@ -60,7 +61,12 @@ class FileScanner:
 
     def _should_ignore(self, file_path: Path) -> bool:
         """Check if file is in an ignored directory."""
+        # Check each part of the path against ignore patterns
         for part in file_path.parts:
             if part in self.ignore_patterns:
                 return True
+            # Also check wildcard patterns
+            for pattern in self.ignore_patterns:
+                if fnmatch.fnmatch(part, pattern):
+                    return True
         return False

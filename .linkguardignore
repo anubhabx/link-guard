@@ -1,0 +1,44 @@
+# LinkGuard Ignore Patterns
+# Lines starting with # are comments
+# Uses gitignore-style syntax
+
+# Directories
+node_modules/
+.git/
+.venv/
+reports/
+__pycache__/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+coverage/
+
+# Build artifacts
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+*.cache
+
+# Documentation build outputs
+_build/
+site/
+
+# Package files
+*.whl
+*.tar.gz
