@@ -17,7 +17,7 @@ app = typer.Typer(
     name="linkguard",
     help="CLI tool for detecting broken links and localhost URLs in " "project files",
 )
-console = Console()
+console = Console(force_terminal=True, legacy_windows=False)
 
 
 @app.command()
@@ -45,6 +45,15 @@ def scan(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ) -> None:
     """Scan directory for broken links and environment violations."""
+    
+    # Validate directory exists
+    if not directory.exists():
+        console.print(f"[bold red]Error:[/bold red] Directory does not exist: {directory}")
+        raise typer.Exit(code=2)
+    
+    if not directory.is_dir():
+        console.print(f"[bold red]Error:[/bold red] Path is not a directory: {directory}")
+        raise typer.Exit(code=2)
 
     # Load configuration with CLI overrides
     cli_overrides: Dict[str, Any] = {}
@@ -66,7 +75,7 @@ def scan(
     final_timeout = config.get("timeout", 10)
     final_concurrency = config.get("concurrency", 10)
 
-    console.print(f"[bold blue]🔍 Scanning directory:[/bold blue] {directory}")
+    console.print(f"[bold blue]Scanning directory:[/bold blue] {directory}")
     console.print(
         f"[dim]Mode: {final_mode} | Timeout: {final_timeout}s | Concurrency: {final_concurrency}[/dim]\n"
     )
@@ -78,7 +87,7 @@ def scan(
     scanner = FileScanner(directory, ignore_patterns=set(config.get_ignore_patterns()))
     files = scanner.scan()
 
-    console.print(f"[green]:white_check_mark:[/green] Found {len(files)} files to scan")
+    console.print(f"[green][/green] Found {len(files)} files to scan")
 
     # Extract URLs from files
     extractor = URLExtractor()
@@ -89,7 +98,7 @@ def scan(
         if urls:
             all_urls.extend([(file, url) for url in urls])
 
-    console.print(f"[green]:white_check_mark:[/green] Extracted {len(all_urls)} URLs.\n")
+    console.print(f"[green][/green] Extracted {len(all_urls)} URLs.\n")
 
     if not all_urls:
         console.print("[bold yellow]No URLs found to check.[/bold yellow]")
@@ -100,7 +109,7 @@ def scan(
     violations = rules.check_urls(all_urls)
 
     if violations:
-        console.print(f"[bold red]:warning: Found {len(violations)} rule violations:[/bold red]")
+        console.print(f"[bold red] Found {len(violations)} rule violations:[/bold red]")
         for v in violations:
             console.print(
                 f" - [red]{v.url}[/red] in {v.file_path}:{v.line_number or '?'} (Rule: {v.rule})"
@@ -108,7 +117,7 @@ def scan(
         console.print()
 
     # Check links asynchronously
-    console.print(":globe_showing_europe-africa: [bold blue]Checking links...[/bold blue]\n")
+    console.print("[bold blue]Checking links...[/bold blue]\n")
 
     checker = LinkChecker(timeout=final_timeout, max_concurrent=final_concurrency)
 
@@ -150,7 +159,7 @@ def scan(
 
     # Show broken links details
     if broken_links:
-        console.print(f"[bold red]:x: Found {len(broken_links)} broken links:[/bold red]")
+        console.print(f"[bold red] Found {len(broken_links)} broken links:[/bold red]")
         for result in broken_links:
             console.print(
                 f" - [red]{result.url}[/red] in "
@@ -160,7 +169,7 @@ def scan(
 
     if working_links:
         console.print(
-            f"\n[bold green]:white_check_mark: Found "
+            f"\n[bold green] Found "
             f"{len(working_links)} working links.[/bold green]"
         )
 
@@ -194,11 +203,11 @@ def scan(
 
             console.print(f"[bold green]:tada: Results exported to {export_path}[/bold green]")
         except Exception as e:
-            console.print(f"[red]:x: Failed to export results: {e}[/red]")
+            console.print(f"[red] Failed to export results: {e}[/red]")
 
     # Exit with appropriate code
     if violations and final_mode == "prod":
-        console.print("\n[yellow]⚠️ Environment violations detected in production mode![/yellow]")
+        console.print("\n[yellow] Environment violations detected in production mode![/yellow]")
         for v in violations[:5]:
             console.print(f"  • {v.url} in {v.file_path}:{v.line_number or '?'} ({v.rule})")
         raise typer.Exit(code=3)
@@ -207,7 +216,6 @@ def scan(
         raise typer.Exit(code=1)
 
     raise typer.Exit(code=0)
-
 
 def main():
     app()

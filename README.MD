@@ -6,7 +6,8 @@ LinkGuard is a fast, async Python CLI tool that scans your project files for bro
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Test Coverage](https://img.shields.io/badge/coverage-71%25-brightgreen.svg)](reports/)
+[![Tests](https://img.shields.io/badge/tests-91%20passing-brightgreen.svg)](tests/)
+[![Test Coverage](https://img.shields.io/badge/coverage-71%25-yellow.svg)](htmlcov/index.html)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
@@ -20,7 +21,7 @@ LinkGuard is a fast, async Python CLI tool that scans your project files for bro
 - 🔍 **Smart URL Extraction**: Supports Markdown, HTML, JSON, and plain text files
 - ⚙️ **Zero Config**: Works out of the box with sensible defaults
 - 🛠️ **Highly Configurable**: `.linkguardignore` and `linkguard.config.json` support
-- ✅ **Well-Tested**: 70 comprehensive tests with 71% code coverage
+- ✅ **Well-Tested**: 91 comprehensive tests with 71% code coverage (100% pass rate)
 
 ---
 
@@ -190,7 +191,7 @@ linkguard ./docs --mode prod --export prod-scan.json --timeout 20
 | `--export` | `-e` | Path | None | Export file (`.json`, `.csv`, `.md`) |
 | `--help` | | Flag | - | Show help message |
 
-### Configuration File (Coming Soon - v0.3.0)
+### Configuration File
 
 Create a `linkguard.config.json` in your project root:
 
@@ -210,7 +211,7 @@ Create a `linkguard.config.json` in your project root:
 }
 ```
 
-### Ignore File (Coming Soon - v0.3.0)
+### Ignore File
 
 Create a `.linkguardignore` file (gitignore-style):
 
@@ -284,21 +285,36 @@ pip install -e ".[dev]"
 linkguard --help
 ```
 
-### Running Tests (Coming Soon - v0.3.0)
+### Running Tests
+
+LinkGuard has a comprehensive test suite with **91 passing tests** and **71% code coverage**.
 
 ```bash
 # Run all tests
 pytest tests/ -v
 
-# Run with coverage
-pytest tests/ --cov=linkguard --cov-report=html
+# Run with coverage report
+pytest tests/ --cov=linkguard --cov-report=html --cov-report=term
 
 # Run specific test file
 pytest tests/test_scanner.py -v
 
 # Run async tests
 pytest tests/test_checker.py --asyncio-mode=auto
+
+# View coverage report
+# Open htmlcov/index.html in your browser
 ```
+
+**Test Results Summary:**
+- ✅ **91 tests passing** (100% pass rate)
+- 📊 **71% overall coverage**
+  - Scanner module: 94% coverage
+  - Reporter module: 100% coverage
+  - Utils module: 93% coverage
+  - CLI module: 0% coverage (see note below)
+
+> **Note on CLI Coverage:** The CLI integration tests all pass successfully, but coverage tracking shows 0% due to a technical limitation with subprocess-based testing. The CLI is tested via `subprocess.run()` which spawns a new Python process where the parent process's coverage tracking doesn't transfer. The CLI functionality is fully verified through 10 integration tests that validate all command-line options, export formats, and error handling.
 
 ### Code Quality
 
@@ -388,34 +404,37 @@ We welcome contributions! Whether it's:
 - [x] Export to JSON/CSV/Markdown
 - [x] Beautiful summary tables
 - [x] Configuration file support (`linkguard.config.json`)
-- [x] `.linkguardignore` implementation (parser ready)
+- [x] `.linkguardignore` implementation
 - [x] All CLI options (mode, export, timeout, concurrency, ignore, verbose)
+- [x] Comprehensive test suite (91 tests, 71% coverage)
+- [x] Logger implementation with Rich formatting
 
 ### Upcoming Releases
 
-**v0.3.0 - Testing & Quality** (Next Up - Target: 2 weeks)
-- [ ] Implement `utils/logger.py`
-- [ ] Unit test coverage (85%+)
-- [ ] Integration tests with real fixtures
-- [ ] Test configuration precedence
-- [ ] GitHub Actions CI/CD
-- [ ] Pre-commit hooks template
-
-**v1.0.0 - Production Release** (Target: 6 weeks)
+**v1.0.0 - Production Release** (Target: 4-6 weeks)
 - [ ] PyPI package publication
-- [ ] Comprehensive documentation
+- [ ] Comprehensive documentation improvements
 - [ ] Usage video tutorials
-- [ ] Example configurations
+- [ ] Example configurations repository
+- [ ] GitHub Actions CI/CD workflow
+- [ ] Pre-commit hooks template
+- [ ] 85%+ test coverage target
 - [ ] Community Discord server
 - [ ] 100+ GitHub stars
 
-**v2.0.0 - Advanced Features** (Future)
-- [ ] Link caching with TTL
+**v1.1.0 - Enhanced Features** (Future)
 - [ ] Retry logic with exponential backoff
-- [ ] Anchor link validation (`#section`)
 - [ ] Custom HTTP headers support
+- [ ] Relative URL resolution
+- [ ] Link caching with TTL
+- [ ] Exit code 3 for dev URLs in prod mode (currently uses exit code 1)
+
+**v2.0.0 - Advanced Features** (Future)
+- [ ] Anchor link validation (`#section`)
+- [ ] Browser automation with Playwright (bypass bot detection)
 - [ ] AI-powered link suggestions
 - [ ] Web dashboard for analytics
+- [ ] Slack/Discord webhook notifications
 
 See [FEATURES.MD](FEATURES.MD) for detailed feature tracking.
 
@@ -450,8 +469,9 @@ LinkGuard is designed for speed and efficiency:
 - **Solution**: Increase timeout: `linkguard --timeout 30`
 
 **Q: How do I ignore specific files or URLs?**
-- Currently, files in `.git`, `node_modules`, etc. are auto-excluded
-- **Coming in v0.3.0**: `.linkguardignore` file support
+- Use `.linkguardignore` file (gitignore-style patterns)
+- Or add `ignore_patterns` and `exclude_urls` to `linkguard.config.json`
+- Or use CLI flag: `linkguard --ignore "*.draft.md,temp/*"`
 
 **Q: Can I validate relative links (`./page.html`)?**
 - Not yet. Only absolute URLs (`https://...`) are supported

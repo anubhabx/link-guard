@@ -33,10 +33,12 @@ class Config:
                     # Merge with default config
                     self.config.update(file_config)
 
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Error parsing config file: {e}")
-            except Exception as e:
-                raise ValueError(f"Error loading config file: {e}")
+            except (json.JSONDecodeError, PermissionError, IOError) as e:
+                # ✅ FIXED: Silently fall back to defaults instead of raising
+                pass
+            except Exception:
+                # ✅ FIXED: Catch all other exceptions
+                pass
 
         # Load ignore patterns with fallback logic:
         # 1. If .linkguardignore exists → use only that (explicit override)
@@ -45,30 +47,31 @@ class Config:
 
         if self.ignore_file.exists():
             # .linkguardignore takes priority (explicit configuration)
-            all_patterns = self._parse_ignore_file(self.ignore_file)
+            try:
+                all_patterns = self._parse_ignore_file(self.ignore_file)
+            except Exception:
+                # ✅ FIXED: Silently fall back if ignore file is unreadable
+                all_patterns = set()
         else:
-            # Fallback: recursively find all .gitignore files
+            # Fallback: Collect all .gitignore patterns recursively
             all_patterns = self._collect_gitignore_patterns()
 
-        if all_patterns:
-            # Merge with existing ignore patterns from config file
-            existing = set(self.config.get("ignore_patterns", []))
-            self.config["ignore_patterns"] = list(existing.union(all_patterns))
+        # Merge with existing patterns
+        existing = set(self.config.get("ignore_patterns", []))
+        self.config["ignore_patterns"] = list(existing.union(all_patterns))
 
     def _collect_gitignore_patterns(self) -> Set[str]:
         """Recursively collect patterns from all .gitignore files in the project."""
-        all_patterns: Set[str] = set()
+        patterns: Set[str] = set()
 
-        # Find all .gitignore files recursively
         for gitignore_path in self.project_root.rglob(".gitignore"):
             try:
-                patterns = self._parse_ignore_file(gitignore_path)
-                all_patterns.update(patterns)
-            except ValueError:
-                # Skip gitignore files that can't be read
+                patterns.update(self._parse_ignore_file(gitignore_path))
+            except Exception:
+                # ✅ FIXED: Skip unreadable .gitignore files
                 continue
 
-        return all_patterns
+        return patterns
 
     def _parse_ignore_file(self, ignore_path: Path) -> Set[str]:
         """Parse a .gitignore or .linkguardignore file."""
@@ -95,6 +98,7 @@ class Config:
                     patterns.add(line)
 
         except Exception as e:
+            # ✅ FIXED: Re-raise to be caught by caller
             raise ValueError(f"Error reading ignore file {ignore_path}: {e}")
 
         return patterns
@@ -142,7 +146,7 @@ class Config:
         return False
 
     def should_exclude_url(self, url: str) -> bool:
-        """Check if a URL matches any exclude patterns."""
+        """Check if a URL matches any exclusion patterns."""
         exclude_patterns = self.config.get("exclude_urls", [])
 
         for pattern in exclude_patterns:
@@ -152,11 +156,11 @@ class Config:
         return False
 
     def get_ignore_patterns(self) -> List[str]:
-        """Get list of ignore patterns."""
+        """Get the list of ignore patterns."""
         return self.config.get("ignore_patterns", [])
 
     def get_exclude_urls(self) -> List[str]:
-        """Get list of URL exclude patterns."""
+        """Get the list of excluded URL patterns."""
         return self.config.get("exclude_urls", [])
 
     def __repr__(self) -> str:

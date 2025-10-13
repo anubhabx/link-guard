@@ -1,5 +1,6 @@
 import pytest
 import asyncio
+import ssl
 from unittest.mock import AsyncMock, MagicMock, patch
 from linkguard.scanner.link_checker import LinkChecker, LinkResult
 
@@ -175,3 +176,73 @@ async def test_multiple_urls_from_same_file():
         assert results_sorted[1].line_number == 10
         assert results_sorted[0].url == "https://github.com"
         assert results_sorted[1].url == "https://google.com"
+
+
+@pytest.mark.asyncio
+async def test_ssl_certificate_error():
+    """Test handling of SSL certificate errors."""
+    checker = LinkChecker(timeout=5)
+    
+    async def ssl_error_mock(*args, **kwargs):
+        """Mock SSL certificate error."""
+        await asyncio.sleep(0)
+        raise ssl.SSLError("Certificate verification failed")
+    
+    mock_context = AsyncMock()
+    mock_context.__aenter__.side_effect = ssl_error_mock
+    mock_context.__aexit__ = AsyncMock(return_value=None)
+    
+    with patch('aiohttp.ClientSession.head', return_value=mock_context):
+        url_data = [("test.md", {"url": "https://expired-cert-site.com", "line_number": 1})]
+        results = await checker.check_links(url_data)
+        
+        assert len(results) == 1
+        assert results[0].is_broken is True
+        assert results[0].error is not None
+        assert "ssl" in results[0].error.lower() or "certificate" in results[0].error.lower()
+
+
+@pytest.mark.asyncio
+async def test_connection_error():
+    """Test handling of connection errors."""
+    checker = LinkChecker(timeout=5)
+    
+    async def connection_error_mock(*args, **kwargs):
+        """Mock connection error."""
+        await asyncio.sleep(0)
+        raise ConnectionError("Failed to connect")
+    
+    mock_context = AsyncMock()
+    mock_context.__aenter__.side_effect = connection_error_mock
+    mock_context.__aexit__ = AsyncMock(return_value=None)
+    
+    with patch('aiohttp.ClientSession.head', return_value=mock_context):
+        url_data = [("test.md", {"url": "https://unreachable-site.com", "line_number": 1})]
+        results = await checker.check_links(url_data)
+        
+        assert len(results) == 1
+        assert results[0].is_broken is True
+        assert results[0].error is not None
+
+
+@pytest.mark.asyncio
+async def test_generic_exception_handling():
+    """Test handling of generic exceptions."""
+    checker = LinkChecker(timeout=5)
+    
+    async def generic_error_mock(*args, **kwargs):
+        """Mock generic exception."""
+        await asyncio.sleep(0)
+        raise Exception("Unexpected error occurred")
+    
+    mock_context = AsyncMock()
+    mock_context.__aenter__.side_effect = generic_error_mock
+    mock_context.__aexit__ = AsyncMock(return_value=None)
+    
+    with patch('aiohttp.ClientSession.head', return_value=mock_context):
+        url_data = [("test.md", {"url": "https://error-site.com", "line_number": 1})]
+        results = await checker.check_links(url_data)
+        
+        assert len(results) == 1
+        assert results[0].is_broken is True
+        assert results[0].error is not None

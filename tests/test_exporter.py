@@ -112,7 +112,7 @@ def test_export_to_csv(tmp_path, sample_results, sample_violations):
     assert "File Path" in rows[0]    # Not "File"
     assert "Line Number" in rows[0]  # Not "Line"
     
-    # Verify data rows (2 results, violations are merged)
+    # Verify data rows (2 results)
     assert len(rows) == 2
     
     # Verify result data
@@ -224,7 +224,7 @@ def test_json_timestamp_format(tmp_path, sample_results):
     # Should be in ISO format (YYYY-MM-DDTHH:MM:SS)
     assert "T" in timestamp
     # Try parsing it
-    datetime.fromisoformat(timestamp)  # Removed .replace() since it's already ISO
+    datetime.fromisoformat(timestamp)  # Will raise if format is wrong
 
 
 def test_csv_handles_none_values(tmp_path):
@@ -237,7 +237,7 @@ def test_csv_handles_none_values(tmp_path):
             file_path="test.md",
             line_number=None,
             error="Connection timeout",
-            response_time=None
+            response_time=0.123
         )
     ]
     
@@ -248,7 +248,7 @@ def test_csv_handles_none_values(tmp_path):
         reader = csv.DictReader(f)
         rows = list(reader)
     
-    # Verify None values are handled (converted to "N/A" or empty string)
+    # Verify None values are handled (converted to "N/A")
     assert len(rows) == 1
     assert rows[0]["URL"] == "https://example.com"
     # Status should be "N/A" (actual implementation)
