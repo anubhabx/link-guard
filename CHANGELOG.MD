@@ -10,25 +10,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### To Be Added in v0.4.0
-- GitHub Actions CI/CD workflow with multi-OS/Python version testing
-- Integration tests for CLI module (subprocess-based)
-- Pre-commit hooks template
-- Coverage upload to Codecov
-- Linting integration (Black, flake8, mypy in CI)
+- Performance benchmarks and optimization
+- Pre-commit hooks template  
+- Advanced retry logic with exponential backoff
+- Custom headers support for authenticated requests
 
 ---
 
-## [0.3.0] - 2025-10-12
+## [0.3.0] - 2025-10-15
 
 ### Added
-- **Comprehensive Test Suite (70 tests, 71% coverage)**
+- **Comprehensive Test Suite (91 tests, 71% coverage)**
   - Scanner tests (13 tests): File discovery, ignore patterns, hidden files
   - URL Extractor tests (16 tests): Markdown, HTML, JSON, JS/TS extraction
-  - Link Checker tests (7 tests): Async HTTP validation with mocking
-  - Configuration tests (14 tests): Config loading, precedence, ignore files
+  - Link Checker tests (10 tests): Async HTTP validation with mocking
+  - Configuration tests (23 tests): Config loading, precedence, ignore files
   - Logger tests (5 tests): Rich logging implementation
   - Environment Rules tests (8 tests): Localhost, private IPs, dev domains
   - Exporter tests (9 tests): JSON, CSV, Markdown export validation
+  - **CLI Integration tests (10 tests)**: End-to-end CLI command testing
+
+- **GitHub Actions CI/CD Workflow**
+  - Multi-OS testing (Ubuntu, Windows, macOS)
+  - Multi-Python version testing (3.10, 3.11, 3.12, 3.13)
+  - Automated linting (Black, flake8, mypy)
+  - Coverage reporting with Codecov integration
+  - Package build verification
+  - Code quality checks with coverage threshold (70%)
 
 - **Logger Implementation (`utils/logger.py`)**
   - Rich logging with color-coded output
@@ -44,6 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - AsyncMock for HTTP response mocking
 
 ### Changed
+- **Fixed CLI Typer compatibility issue**
+  - Changed `directory` argument from Path with default to Optional[str]
+  - Resolved `TyperArgument.make_metavar()` TypeError
+  - CLI now works with Typer 0.19.2+
 - Improved async result ordering in link checker tests
 - Enhanced path matching for directory detection in file scanner
 - Updated hidden file filtering logic
@@ -53,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Async ordering issue in multi-URL test cases
 - Path pattern matching for nested directories
 - Hidden file filtering (files starting with `.`)
+- CLI module import issues (installed package in editable mode)
 
 ### Test Coverage by Module
 - `file_scanner.py`: 100% (26 statements)
@@ -60,10 +73,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `rules.py`: 100% (29 statements)
 - `exporter.py`: 100% (48 statements)
 - `logger.py`: 100% (13 statements)
-- `config.py`: 89% (91 statements, 10 missed)
-- `link_checker.py`: 78% (67 statements, 15 missed)
-- `cli.py`: 0% (108 statements - integration tests deferred to v0.4.0)
-- **Overall**: 71% coverage (456 statements, 133 missed)
+- `config.py`: 92% (92 statements, 7 missed)
+- `link_checker.py`: 82% (67 statements, 12 missed)
+- `cli.py`: 0% (115 statements - tested via integration tests)
+- **Overall**: 71% coverage (464 statements, 134 missed)
 
 ---
 
