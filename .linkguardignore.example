@@ -1,0 +1,76 @@
+# LinkGuard Ignore Patterns
+# This file uses gitignore-style pattern matching to exclude files/directories from scanning
+# Lines starting with # are comments and will be ignored
+
+# Build directories
+dist/
+build/
+*.egg-info/
+
+# Dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+env/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Version control
+.git/
+.svn/
+.hg/
+
+# Cache directories
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+
+# Documentation builds
+docs/_build/
+site/
+.docz/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Test coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# Log files
+*.log
+logs/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archive files (optional - uncomment if needed)
+# *.zip
+# *.tar.gz
+# *.rar
+# *.7z
+
+# Compiled files (optional - uncomment if needed)
+# *.min.js
+# *.min.css
+# *.bundle.js
+
+# Draft or work-in-progress files (examples)
+# draft-*.md
+# WIP-*.md
+# TODO-*.md

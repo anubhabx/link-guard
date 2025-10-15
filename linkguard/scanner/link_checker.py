@@ -1,13 +1,45 @@
+"""Link validation module for asynchronous HTTP checking.
+
+This module provides the LinkChecker class which performs concurrent
+HTTP requests to validate URLs using aiohttp. It implements smart
+fallback strategies and respects concurrency limits.
+"""
+
 import asyncio
 import aiohttp
-from typing import Sequence, Dict, Any, Optional, Callable, Tuple, Union
-from dataclasses import dataclass
+from typing import Sequence, Dict, Any, Optional, Callable, Tuple, Union, List, Final
+from dataclasses import dataclass, field
 from pathlib import Path
+from time import time
 
 
-@dataclass
+@dataclass(frozen=True)
 class LinkResult:
-    """Result of checking a single link."""
+    """Result of checking a single link.
+    
+    This dataclass is immutable (frozen=True) to ensure thread safety
+    and prevent accidental modifications.
+    
+    Attributes:
+        url: The URL that was checked
+        status_code: HTTP status code (200, 404, etc.) or None if failed
+        is_broken: True if link is broken (4xx, 5xx, or error)
+        error: Error message if request failed, None otherwise
+        response_time: Time taken for the request in seconds
+        file_path: Path to the file where URL was found
+        line_number: Line number in file, or None if not applicable
+        
+    Example:
+        >>> result = LinkResult(
+        ...     url="https://example.com",
+        ...     status_code=200,
+        ...     is_broken=False,
+        ...     error=None,
+        ...     response_time=0.523,
+        ...     file_path="docs/api.md",
+        ...     line_number=42
+        ... )
+    """
 
     url: str
     status_code: Optional[int]
@@ -19,10 +51,30 @@ class LinkResult:
 
 
 class LinkChecker:
-    """Asynchronously checks URLs for validity."""
+    """Asynchronously checks URLs for validity.
+    
+    Performs concurrent HTTP requests with configurable timeout and
+    concurrency limits. Implements smart fallback strategies:
+    1. Try HEAD request first (faster, less bandwidth)
+    2. Fall back to GET if HEAD fails or returns 403/405
+    3. Handle various error types gracefully
+    
+    Attributes:
+        timeout: Request timeout in seconds
+        max_concurrent: Maximum number of concurrent requests
+        DEFAULT_HEADERS: Browser-like headers to avoid bot detection
+        
+    Example:
+        >>> checker = LinkChecker(timeout=15, max_concurrent=100)
+        >>> results = await checker.check_links(url_data)
+        >>> broken = [r for r in results if r.is_broken]
+        >>> print(f"Found {len(broken)} broken links")
+    """
 
-    # Browser-like headers without Brotli (avoids decode errors)
-    DEFAULT_HEADERS = {
+    # Browser-like headers to avoid bot detection
+    # Note: Brotli encoding removed to avoid decode errors
+    # These headers make requests appear to come from a real browser
+    DEFAULT_HEADERS: Final[Dict[str, str]] = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -40,24 +92,52 @@ class LinkChecker:
         "Cache-Control": "max-age=0",
     }
 
-    def __init__(self, timeout: int = 10, max_concurrent: int = 50):
-        self.timeout = timeout
-        self.max_concurrent = max_concurrent
+    def __init__(self, timeout: int = 10, max_concurrent: int = 50) -> None:
+        """Initialize the LinkChecker.
+        
+        Args:
+            timeout: Request timeout in seconds (default: 10)
+            max_concurrent: Maximum concurrent requests (default: 50)
+                Higher values = faster but more resource intensive
+                Recommended range: 10-200
+                
+        Note:
+            Setting max_concurrent too high may overwhelm servers
+            or trigger rate limiting. Start conservative and increase
+            if needed.
+        """
+        self.timeout: int = timeout
+        self.max_concurrent: int = max_concurrent
 
     async def check_links(
         self,
         url_data: Sequence[Tuple[Union[Path, str], Dict[str, Any]]],
         progress_callback: Optional[Callable[[int], None]] = None,
-    ) -> list[LinkResult]:
-        """
-        Check a list of URLs concurrently.
+    ) -> List[LinkResult]:
+        """Check a list of URLs concurrently.
+        
+        Performs asynchronous HTTP requests with semaphore-based
+        concurrency control. Provides progress updates via callback.
 
         Args:
-            url_data: List of tuples containing (file_path, url_info).
-            progress_callback: Callback function to report progress
+            url_data: Sequence of (file_path, url_info) tuples where
+                url_info contains 'url', 'line_number', and 'context'
+            progress_callback: Optional callback function called with
+                completed count after each request finishes
 
         Returns:
-            list[LinkResult]: List of results for each URL checked.
+            List of LinkResult objects, one for each URL checked.
+            Results are returned in completion order, not input order.
+            
+        Example:
+            >>> def on_progress(completed):
+            ...     print(f"Progress: {completed} links checked")
+            >>> results = await checker.check_links(urls, on_progress)
+            
+        Note:
+            Uses asyncio.as_completed() for results as they finish,
+            which provides better progress feedback but results are
+            not in the original order.
         """
 
         semaphore = asyncio.Semaphore(self.max_concurrent)

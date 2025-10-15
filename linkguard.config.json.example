@@ -1,0 +1,19 @@
+{
+  "mode": "dev",
+  "timeout": 10,
+  "concurrency": 50,
+  "ignore_patterns": [
+    "node_modules",
+    "dist",
+    "build",
+    "__pycache__",
+    ".git"
+  ],
+  "exclude_urls": [
+    "http://localhost:*",
+    "http://127.0.0.1:*",
+    "https://example.com",
+    "https://example.org"
+  ],
+  "strict_ssl": false
+}
