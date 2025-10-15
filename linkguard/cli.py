@@ -22,7 +22,7 @@ console = Console(force_terminal=True, legacy_windows=False)
 
 @app.command()
 def scan(
-    directory: Path = typer.Argument(".", help="Directory to scan"),
+    directory: Optional[str] = typer.Argument(None, help="Directory to scan (default: current directory)"),
     mode: str = typer.Option(
         "dev",
         "--mode",
@@ -46,13 +46,16 @@ def scan(
 ) -> None:
     """Scan directory for broken links and environment violations."""
     
+    # Convert directory to Path, default to current directory
+    dir_path = Path(directory) if directory else Path(".")
+    
     # Validate directory exists
-    if not directory.exists():
-        console.print(f"[bold red]Error:[/bold red] Directory does not exist: {directory}")
+    if not dir_path.exists():
+        console.print(f"[bold red]Error:[/bold red] Directory does not exist: {dir_path}")
         raise typer.Exit(code=2)
     
-    if not directory.is_dir():
-        console.print(f"[bold red]Error:[/bold red] Path is not a directory: {directory}")
+    if not dir_path.is_dir():
+        console.print(f"[bold red]Error:[/bold red] Path is not a directory: {dir_path}")
         raise typer.Exit(code=2)
 
     # Load configuration with CLI overrides
@@ -65,7 +68,7 @@ def scan(
         cli_overrides["ignore_patterns"] = [p.strip() for p in ignore.split(",")]
 
     try:
-        config = load_config(directory, cli_overrides)
+        config = load_config(dir_path, cli_overrides)
     except ValueError as e:
         console.print(f"[bold red]Configuration Error:[/bold red] {e}")
         raise typer.Exit(code=2)
@@ -75,7 +78,7 @@ def scan(
     final_timeout = config.get("timeout", 10)
     final_concurrency = config.get("concurrency", 10)
 
-    console.print(f"[bold blue]Scanning directory:[/bold blue] {directory}")
+    console.print(f"[bold blue]Scanning directory:[/bold blue] {dir_path}")
     console.print(
         f"[dim]Mode: {final_mode} | Timeout: {final_timeout}s | Concurrency: {final_concurrency}[/dim]\n"
     )
@@ -84,7 +87,7 @@ def scan(
         console.print(f"[dim]Ignoring patterns: {', '.join(config.get_ignore_patterns())}[/dim]\n")
 
     # Scan for files
-    scanner = FileScanner(directory, ignore_patterns=set(config.get_ignore_patterns()))
+    scanner = FileScanner(dir_path, ignore_patterns=set(config.get_ignore_patterns()))
     files = scanner.scan()
 
     console.print(f"[green][/green] Found {len(files)} files to scan")
@@ -179,7 +182,7 @@ def scan(
         extension = export_path.suffix.lower()
 
         metadata: Dict[str, Any] = {
-            "directory": str(directory),
+            "directory": str(dir_path),
             "mode": final_mode,
             "timeout": final_timeout,
             "concurrency": final_concurrency,
