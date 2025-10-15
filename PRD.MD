@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Last Updated:** 2025-10-15  
-**Status:** Production Release (v1.0.0)  
+**Status:** Production Release (v1.0)  
 **Owner:** Development Team
 
 ---
@@ -405,7 +405,7 @@ linkguard scan --verbose
 - [x] Logger implementation
 - [x] Test infrastructure
 
-### Phase 4: Production Release (v1.0.0) - **COMPLETED** ✅ (October 15, 2025)
+### Phase 4: Production Release (v1.0) - **COMPLETED** ✅ (October 15, 2025)
 - [x] Package on PyPI (TestPyPI published, PyPI ready)
 - [x] Comprehensive documentation (README, CONTRIBUTING, examples)
 - [x] Example configurations (.linkguardignore.example, config.json.example)

@@ -3,7 +3,7 @@
 > **Fast, async link validation for developers. Catch broken links before your users do.**
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/anubhabx/link-guard/releases)
+[![Version](https://img.shields.io/badge/version-1.0-green.svg)](https://github.com/anubhabx/link-guard/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://img.shields.io/badge/tests-91%20passing-brightgreen.svg)](tests/)
 [![Test Coverage](https://img.shields.io/badge/coverage-71%25-yellow.svg)](htmlcov/index.html)
@@ -103,7 +103,7 @@ Mode: dev | Timeout: 10s
 | **[QUICKSTART.md](QUICKSTART.MD)** | Installation, basic usage, and common examples |
 | **[FEATURES.md](FEATURES.MD)** | Complete feature list and capabilities |
 | **[CONTRIBUTING.md](CONTRIBUTING.md)** | Development setup, testing, and contribution guidelines |
-| **[RELEASE_NOTES.md](RELEASE_NOTES.md)** | v1.0.0 release details and highlights |
+| **[RELEASE_NOTES.md](RELEASE_NOTES.md)** | v1.0 release details and highlights |
 | **[CHANGELOG.md](CHANGELOG.MD)** | Full version history and changes |
 
 ---
@@ -247,7 +247,7 @@ pytest tests/ -v
 
 ## 🗺️ Roadmap
 
-### ✅ v1.0.0 (Current - October 2025)
+### ✅ v1.0 (Current - October 2025)
 - Production-ready release
 - Comprehensive documentation
 - 91 passing tests with 71% coverage

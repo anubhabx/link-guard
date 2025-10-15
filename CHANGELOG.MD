@@ -2,7 +2,7 @@
 
 All notable changes to LinkGuard will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
@@ -18,10 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2025-10-15 🎉
+## [1.0] - 2025-10-15 🎉
 
 ### Production Release
-LinkGuard v1.0.0 marks the first production-ready release with comprehensive documentation, extensive testing, and CI/CD automation.
+LinkGuard v1.0 marks the first production-ready release with comprehensive documentation, extensive testing, and CI/CD automation.
 
 ### Added
 - **Comprehensive Documentation**
@@ -32,7 +32,7 @@ LinkGuard v1.0.0 marks the first production-ready release with comprehensive doc
   - CONTRIBUTING.md (300+ lines) with development guidelines
   - .linkguardignore.example template
   - linkguard.config.json.example template
-  - RELEASE_NOTES.md with comprehensive v1.0.0 overview
+  - RELEASE_NOTES.md with comprehensive v1.0 overview
 
 - **Type Safety Enhancements**
   - `Final` type hints for all immutable class constants
@@ -259,8 +259,8 @@ LinkGuard v1.0.0 marks the first production-ready release with comprehensive doc
 
 ---
 
-[Unreleased]: https://github.com/anubhabx/link-guard/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/anubhabx/link-guard/compare/v0.3.0...v1.0.0
+[Unreleased]: https://github.com/anubhabx/link-guard/compare/v1.0...HEAD
+[1.0]: https://github.com/anubhabx/link-guard/compare/v0.3.0...v1.0
 [0.3.0]: https://github.com/anubhabx/link-guard/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/anubhabx/link-guard/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/anubhabx/link-guard/compare/v0.0.1...v0.1.0

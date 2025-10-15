@@ -156,10 +156,10 @@
 - ✅ Create `linkguard.config.json` example file
 - ✅ Add CONTRIBUTING.md (300+ lines)
 - ✅ Add LICENSE file (MIT)
-- ✅ Create RELEASE_NOTES.md for v1.0.0
+- ✅ Create RELEASE_NOTES.md for v1.0
 
 ### Distribution
-- ✅ Build package with `python -m build` (v1.0.0)
+- ✅ Build package with `python -m build` (v1.0)
 - ✅ Test installation from built package
 - ✅ Publish to TestPyPI
 - ⬜ Publish to PyPI (ready, pending final decision)
@@ -191,7 +191,7 @@
 - **v0.1.0**: Core scanning + basic validation (Phases 1-3) - ✅ **COMPLETED**
 - **v0.2.0**: Rich reporting + CLI interface (Phases 4-5) - ✅ **COMPLETED**
 - **v0.3.0**: Testing + CI/CD (Phase 6) - ✅ **COMPLETED** (91 tests, 71% coverage, GitHub Actions CI)
-- **v1.0.0**: Production release (Phase 7) - ✅ **COMPLETED** (October 15, 2025 - Comprehensive docs, published to TestPyPI)
+- **v1.0**: Production release (Phase 7) - ✅ **COMPLETED** (October 15, 2025 - Comprehensive docs, published to TestPyPI)
 - **v1.1.0**: Enhanced features - 🔄 **NEXT** (Retry logic, custom headers, relative URLs)
 - **v2.0.0**: Advanced features (Phase 8) - 💡 **FUTURE**
 
@@ -199,20 +199,20 @@
 
 ## 🎯 Current Sprint Focus (Updated: October 15, 2025)
 
-### ✅ Recently Completed (v1.0.0 - Production Release)
+### ✅ Recently Completed (v1.0 - Production Release)
 - [x] Comprehensive module documentation with type hints
 - [x] Enhanced all scanner modules with detailed docstrings
 - [x] Created CONTRIBUTING.md (300+ lines)
 - [x] Created `.linkguardignore.example` and `linkguard.config.json.example`
 - [x] Created RELEASE_NOTES.md
 - [x] Streamlined README.md with doc references
-- [x] Updated version to 1.0.0 across all files
-- [x] Built v1.0.0 packages (source + wheel)
+- [x] Updated version to 1.0 across all files
+- [x] Built v1.0 packages (source + wheel)
 - [x] Published to TestPyPI
 - [x] Changed project status to Production/Stable
 
-### 🔄 Current Sprint: Post-Release (v1.0.0)
-- [ ] Publish v1.0.0 to PyPI (packages ready)
+### 🔄 Current Sprint: Post-Release (v1.0)
+- [ ] Publish v1.0 to PyPI (packages ready)
 - [ ] Monitor TestPyPI installation
 - [ ] Gather community feedback
 - [ ] Create installation video tutorial
