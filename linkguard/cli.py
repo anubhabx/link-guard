@@ -22,7 +22,9 @@ console = Console(force_terminal=True, legacy_windows=False)
 
 @app.command()
 def scan(
-    directory: Optional[str] = typer.Argument(None, help="Directory to scan (default: current directory)"),
+    directory: Optional[str] = typer.Argument(
+        None, help="Directory to scan (default: current directory)"
+    ),
     mode: str = typer.Option(
         "dev",
         "--mode",
@@ -45,15 +47,15 @@ def scan(
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ) -> None:
     """Scan directory for broken links and environment violations."""
-    
+
     # Convert directory to Path, default to current directory
     dir_path = Path(directory) if directory else Path(".")
-    
+
     # Validate directory exists
     if not dir_path.exists():
         console.print(f"[bold red]Error:[/bold red] Directory does not exist: {dir_path}")
         raise typer.Exit(code=2)
-    
+
     if not dir_path.is_dir():
         console.print(f"[bold red]Error:[/bold red] Path is not a directory: {dir_path}")
         raise typer.Exit(code=2)
@@ -80,7 +82,8 @@ def scan(
 
     console.print(f"[bold blue]Scanning directory:[/bold blue] {dir_path}")
     console.print(
-        f"[dim]Mode: {final_mode} | Timeout: {final_timeout}s | Concurrency: {final_concurrency}[/dim]\n"
+        f"[dim]Mode: {final_mode} | Timeout: {final_timeout}s | "
+        f"Concurrency: {final_concurrency}[/dim]\n"
     )
 
     if verbose and config.get_ignore_patterns():
@@ -171,10 +174,7 @@ def scan(
             )
 
     if working_links:
-        console.print(
-            f"\n[bold green] Found "
-            f"{len(working_links)} working links.[/bold green]"
-        )
+        console.print(f"\n[bold green] Found " f"{len(working_links)} working links.[/bold green]")
 
     # Export results if requested
     if export:
@@ -219,6 +219,7 @@ def scan(
         raise typer.Exit(code=1)
 
     raise typer.Exit(code=0)
+
 
 def main():
     app()

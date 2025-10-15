@@ -14,10 +14,10 @@ from pathlib import Path
 @dataclass(frozen=True)
 class RuleViolation:
     """Represents a rule violation found in a file.
-    
+
     This dataclass is immutable (frozen=True) to ensure it cannot
     be accidentally modified after creation.
-    
+
     Attributes:
         url: The URL that violated the rule
         rule: Rule identifier (e.g., 'no-localhost-in-prod')
@@ -25,7 +25,7 @@ class RuleViolation:
         message: Human-readable description of the violation
         file_path: Path to file where violation was found
         line_number: Line number in file, or None if not applicable
-        
+
     Example:
         >>> violation = RuleViolation(
         ...     url="http://localhost:3000",
@@ -47,17 +47,17 @@ class RuleViolation:
 
 class EnvironmentRules:
     """Checks URLs against predefined environment rules.
-    
+
     Validates URLs to detect development-only references that should
     not appear in production code. Supports two modes:
     - dev mode: Allows all URLs (permissive)
     - prod mode: Flags localhost and private network URLs
-    
+
     Attributes:
         mode: Operating mode ('dev' or 'prod')
         LOCALHOST_PATTERNS: Regex patterns for localhost/dev URLs
         localhost_regex: Compiled regex combining all patterns
-        
+
     Example:
         >>> rules = EnvironmentRules(mode="prod")
         >>> violation = rules.check_url(
@@ -72,14 +72,14 @@ class EnvironmentRules:
     # Patterns that indicate development or localhost URLs
     # Each pattern is designed to catch common development environments
     LOCALHOST_PATTERNS: Final[List[str]] = [
-        r"localhost",                        # Standard localhost name
-        r"127\.0\.0\.1",                      # IPv4 loopback address
-        r"0\.0\.0\.0",                        # Non-routable meta-address
-        r"192\.168\.\d{1,3}\.\d{1,3}",       # Private network Class C
-        r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}",   # Private network Class A
-        r"::1",                              # IPv6 localhost
-        r"\.local(?:/|$)",                   # .local TLD (mDNS)
-        r"\.test(?:/|$)",                    # .test TLD (reserved for testing)
+        r"localhost",  # Standard localhost name
+        r"127\.0\.0\.1",  # IPv4 loopback address
+        r"0\.0\.0\.0",  # Non-routable meta-address
+        r"192\.168\.\d{1,3}\.\d{1,3}",  # Private network Class C
+        r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}",  # Private network Class A
+        r"::1",  # IPv6 localhost
+        r"\.local(?:/|$)",  # .local TLD (mDNS)
+        r"\.test(?:/|$)",  # .test TLD (reserved for testing)
     ]
 
     def __init__(self, mode: str = "dev") -> None:
@@ -89,24 +89,22 @@ class EnvironmentRules:
             mode: Operating mode, either 'dev' or 'prod' (default: 'dev')
                 - dev: Permissive, allows all URLs
                 - prod: Strict, flags localhost/private network URLs
-                
+
         Raises:
             ValueError: If mode is not 'dev' or 'prod'
         """
         if mode not in {"dev", "prod"}:
             raise ValueError(f"Mode must be 'dev' or 'prod', got '{mode}'")
-            
+
         self.mode: str = mode
         # Compile all patterns into a single regex for efficient matching
-        self.localhost_regex: Pattern = re.compile(
-            "|".join(self.LOCALHOST_PATTERNS), re.IGNORECASE
-        )
+        self.localhost_regex: Pattern = re.compile("|".join(self.LOCALHOST_PATTERNS), re.IGNORECASE)
 
     def check_url(
         self, url: str, file_path: str, line_number: Optional[int]
     ) -> Optional[RuleViolation]:
         """Check a single URL against environment rules.
-        
+
         In production mode, validates that URL doesn't point to:
         - localhost or loopback addresses
         - Private network IP ranges
@@ -120,7 +118,7 @@ class EnvironmentRules:
         Returns:
             RuleViolation if a rule is violated in prod mode,
             None otherwise or if in dev mode
-            
+
         Example:
             >>> rules = EnvironmentRules(mode="prod")
             >>> result = rules.check_url(
@@ -147,7 +145,7 @@ class EnvironmentRules:
         self, urls_data: Sequence[Tuple[Union[Path, str], Dict[str, Any]]]
     ) -> List[RuleViolation]:
         """Check multiple URLs against environment rules.
-        
+
         Efficiently validates a batch of URLs by calling check_url
         for each one and collecting violations.
 
@@ -158,7 +156,7 @@ class EnvironmentRules:
         Returns:
             List of RuleViolation objects for URLs that violate rules.
             Empty list if no violations found or in dev mode.
-            
+
         Example:
             >>> rules = EnvironmentRules(mode="prod")
             >>> urls = [

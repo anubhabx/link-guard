@@ -11,17 +11,17 @@ import fnmatch
 
 class FileScanner:
     """Recursively discovers files to scan for links.
-    
+
     The FileScanner walks through a directory tree and identifies files
     that should be scanned for URLs based on their file extensions. It
     respects ignore patterns to skip unwanted files and directories.
-    
+
     Attributes:
         SUPPORTED_EXTENSIONS: Set of file extensions that will be scanned
         DEFAULT_IGNORE_PATTERNS: Set of default patterns to ignore
         root_dir: Root directory to start scanning from
         ignore_patterns: Combined set of ignore patterns
-        
+
     Example:
         >>> scanner = FileScanner(Path("./docs"), {"draft-*", "*.backup"})
         >>> files = scanner.scan()
@@ -30,40 +30,40 @@ class FileScanner:
 
     # File extensions we'll scan for URLs
     SUPPORTED_EXTENSIONS: Final[Set[str]] = {
-        ".md",      # Markdown files
-        ".html",    # HTML files
-        ".htm",     # HTML files (alternative extension)
-        ".json",    # JSON configuration files
-        ".txt",     # Plain text files
-        ".tsx",     # TypeScript React files
-        ".jsx",     # JavaScript React files
-        ".js",      # JavaScript files
+        ".md",  # Markdown files
+        ".html",  # HTML files
+        ".htm",  # HTML files (alternative extension)
+        ".json",  # JSON configuration files
+        ".txt",  # Plain text files
+        ".tsx",  # TypeScript React files
+        ".jsx",  # JavaScript React files
+        ".js",  # JavaScript files
     }
 
     DEFAULT_IGNORE_PATTERNS: Final[Set[str]] = {
-        ".git",           # Git version control
-        ".venv",          # Virtual environment
-        "node_modules",   # Node.js dependencies
-        "__pycache__",    # Python cache
+        ".git",  # Git version control
+        ".venv",  # Virtual environment
+        "node_modules",  # Node.js dependencies
+        "__pycache__",  # Python cache
         ".pytest_cache",  # Pytest cache
-        ".idea",          # JetBrains IDE
-        "dist",           # Distribution directory
-        "build",          # Build directory
+        ".idea",  # JetBrains IDE
+        "dist",  # Distribution directory
+        "build",  # Build directory
     }
 
     def __init__(self, root_dir: Path, ignore_patterns: Optional[Set[str]] = None) -> None:
         """Initialize the FileScanner.
-        
+
         Args:
             root_dir: Root directory to start scanning from
             ignore_patterns: Additional patterns to ignore (merged with defaults)
-            
+
         Raises:
             TypeError: If root_dir is not a Path object
         """
         if not isinstance(root_dir, Path):
             raise TypeError(f"root_dir must be a Path object, got {type(root_dir)}")
-            
+
         self.root_dir: Path = Path(root_dir)
         self.ignore_patterns: Set[str] = ignore_patterns or set()
         # Merge with default patterns to create comprehensive ignore list
@@ -71,7 +71,7 @@ class FileScanner:
 
     def scan(self) -> List[Path]:
         """Recursively scan the root directory for supported files.
-        
+
         Walks through the directory tree starting from root_dir and
         identifies all files with supported extensions that don't match
         ignore patterns or start with a dot (hidden files).
@@ -79,7 +79,7 @@ class FileScanner:
         Returns:
             List of Path objects representing files to scan for URLs.
             Returns empty list if no files found or root_dir doesn't exist.
-            
+
         Example:
             >>> scanner = FileScanner(Path("./docs"))
             >>> files = scanner.scan()
@@ -101,13 +101,13 @@ class FileScanner:
 
     def _should_ignore(self, file_path: Path) -> bool:
         """Check if file path matches any ignore patterns.
-        
+
         Args:
             file_path: File path to check against ignore patterns
-            
+
         Returns:
             True if the file should be ignored, False otherwise
-            
+
         Note:
             Uses fnmatch for pattern matching, which supports wildcards:
             - * matches any sequence of characters

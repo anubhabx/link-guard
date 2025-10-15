@@ -11,19 +11,19 @@ Classes:
 Example:
     >>> from linkguard.scanner.link_checker import LinkResult
     >>> from linkguard.scanner.rules import RuleViolation
-    >>> 
+    >>>
     >>> results = [...]  # List of LinkResult objects
     >>> violations = [...]  # List of RuleViolation objects
-    >>> 
+    >>>
     >>> # Export to JSON
     >>> Exporter.export_to_json(
     ...     results, violations, Path("report.json"),
     ...     metadata={"directory": "/path", "mode": "prod"}
     ... )
-    >>> 
+    >>>
     >>> # Export to CSV
     >>> Exporter.export_to_csv(results, violations, Path("report.csv"))
-    >>> 
+    >>>
     >>> # Export to Markdown
     >>> Exporter.export_to_markdown(
     ...     results, violations, Path("report.md"),
@@ -34,7 +34,7 @@ Example:
 import json
 import csv
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Final
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 
 from linkguard.scanner.link_checker import LinkResult
@@ -43,15 +43,15 @@ from linkguard.scanner.rules import RuleViolation
 
 class Exporter:
     """Static utility class for exporting scan results to multiple formats.
-    
+
     Supports JSON (machine-readable), CSV (spreadsheet), and Markdown (human-readable)
     exports. All exports include timestamps, metadata, and comprehensive result details.
-    
+
     Methods:
         export_to_json: Export to structured JSON with full metadata.
         export_to_csv: Export to CSV spreadsheet format.
         export_to_markdown: Export to formatted Markdown report.
-    
+
     Example:
         >>> Exporter.export_to_json(
         ...     results, violations, Path("output.json"),
@@ -67,22 +67,22 @@ class Exporter:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Export scan results to JSON format with full metadata.
-        
+
         Creates a JSON file with three main sections:
         - metadata: Scan statistics, timestamp, and custom metadata
         - results: Detailed link check results with timing and errors
         - violations: Environment rule violations (dev URLs in prod mode)
-        
+
         Args:
             results: List of link validation results.
             violations: List of environment rule violations.
             output_path: Path where JSON file will be saved.
             metadata: Optional additional metadata (directory, mode, timeout, etc.).
-        
+
         Example:
             >>> metadata = {"directory": "/path", "mode": "prod", "timeout": 10}
             >>> Exporter.export_to_json(results, violations, Path("report.json"), metadata)
-            
+
         Output Structure:
             {
               "metadata": {
@@ -141,16 +141,16 @@ class Exporter:
         output_path: Path,
     ) -> None:
         """Export scan results to CSV spreadsheet format.
-        
+
         Creates a CSV file with columns for URL, status, errors, timing,
         and rule violations. Violations are merged with results by URL
         for a denormalized view suitable for spreadsheet analysis.
-        
+
         Args:
             results: List of link validation results.
             violations: List of environment rule violations.
             output_path: Path where CSV file will be saved.
-        
+
         CSV Columns:
             - URL: The checked URL
             - Status Code: HTTP status code (or N/A)
@@ -161,7 +161,7 @@ class Exporter:
             - Line Number: Line in source file
             - Rule Violation: Rule name if violated
             - Violation Severity: Severity level (warning/error)
-        
+
         Example:
             >>> Exporter.export_to_csv(results, violations, Path("report.csv"))
         """
@@ -213,25 +213,25 @@ class Exporter:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Export scan results to formatted Markdown report.
-        
+
         Creates a human-readable Markdown report with:
         - Summary statistics (total, broken, working, violations)
         - Scan details (directory, mode, timeout from metadata)
         - Rule violations table (if any)
         - Broken links table (if any)
         - Working links table (if any)
-        
+
         Args:
             results: List of link validation results.
             violations: List of environment rule violations.
             output_path: Path where Markdown file will be saved.
             metadata: Optional scan metadata (directory, mode, timeout, etc.).
-        
+
         Report Structure:
             # LinkGuard Scan Report
             ## Summary
             - Statistics
-            ## Scan Details  
+            ## Scan Details
             - Metadata
             ## Rule Violations
             - Table of violations (if any)
@@ -239,7 +239,7 @@ class Exporter:
             - Table of broken links (if any)
             ## Working Links
             - Table of working links (if any)
-        
+
         Example:
             >>> metadata = {"directory": "/my/project", "mode": "prod"}
             >>> Exporter.export_to_markdown(results, violations, Path("report.md"), metadata)

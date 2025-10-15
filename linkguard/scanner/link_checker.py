@@ -8,18 +8,17 @@ fallback strategies and respects concurrency limits.
 import asyncio
 import aiohttp
 from typing import Sequence, Dict, Any, Optional, Callable, Tuple, Union, List, Final
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from time import time
 
 
 @dataclass(frozen=True)
 class LinkResult:
     """Result of checking a single link.
-    
+
     This dataclass is immutable (frozen=True) to ensure thread safety
     and prevent accidental modifications.
-    
+
     Attributes:
         url: The URL that was checked
         status_code: HTTP status code (200, 404, etc.) or None if failed
@@ -28,7 +27,7 @@ class LinkResult:
         response_time: Time taken for the request in seconds
         file_path: Path to the file where URL was found
         line_number: Line number in file, or None if not applicable
-        
+
     Example:
         >>> result = LinkResult(
         ...     url="https://example.com",
@@ -52,18 +51,18 @@ class LinkResult:
 
 class LinkChecker:
     """Asynchronously checks URLs for validity.
-    
+
     Performs concurrent HTTP requests with configurable timeout and
     concurrency limits. Implements smart fallback strategies:
     1. Try HEAD request first (faster, less bandwidth)
     2. Fall back to GET if HEAD fails or returns 403/405
     3. Handle various error types gracefully
-    
+
     Attributes:
         timeout: Request timeout in seconds
         max_concurrent: Maximum number of concurrent requests
         DEFAULT_HEADERS: Browser-like headers to avoid bot detection
-        
+
     Example:
         >>> checker = LinkChecker(timeout=15, max_concurrent=100)
         >>> results = await checker.check_links(url_data)
@@ -79,7 +78,10 @@ class LinkChecker:
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         ),
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,image/apng,*/*;q=0.8"
+        ),
         "Accept-Language": "en-US,en;q=0.9",
         "Accept-Encoding": "gzip, deflate",
         "DNT": "1",
@@ -94,13 +96,13 @@ class LinkChecker:
 
     def __init__(self, timeout: int = 10, max_concurrent: int = 50) -> None:
         """Initialize the LinkChecker.
-        
+
         Args:
             timeout: Request timeout in seconds (default: 10)
             max_concurrent: Maximum concurrent requests (default: 50)
                 Higher values = faster but more resource intensive
                 Recommended range: 10-200
-                
+
         Note:
             Setting max_concurrent too high may overwhelm servers
             or trigger rate limiting. Start conservative and increase
@@ -115,7 +117,7 @@ class LinkChecker:
         progress_callback: Optional[Callable[[int], None]] = None,
     ) -> List[LinkResult]:
         """Check a list of URLs concurrently.
-        
+
         Performs asynchronous HTTP requests with semaphore-based
         concurrency control. Provides progress updates via callback.
 
@@ -128,12 +130,12 @@ class LinkChecker:
         Returns:
             List of LinkResult objects, one for each URL checked.
             Results are returned in completion order, not input order.
-            
+
         Example:
             >>> def on_progress(completed):
             ...     print(f"Progress: {completed} links checked")
             >>> results = await checker.check_links(urls, on_progress)
-            
+
         Note:
             Uses asyncio.as_completed() for results as they finish,
             which provides better progress feedback but results are

@@ -30,19 +30,19 @@ import fnmatch
 
 class Config:
     """Configuration manager with multi-source loading and pattern-based filtering.
-    
+
     Manages configuration hierarchy: CLI args > config file > defaults.
     Supports ignore patterns from .linkguardignore (priority) or .gitignore (fallback).
-    
+
     Attributes:
         project_root (Path): Root directory of the project being scanned.
         config_file (Path): Path to linkguard.config.json file.
         ignore_file (Path): Path to .linkguardignore file.
         config (Dict[str, Any]): Merged configuration dictionary.
-    
+
     Class Attributes:
         DEFAULT_CONFIG (Dict[str, Any]): Default configuration values.
-    
+
     Example:
         >>> config = Config(Path("/my/project"))
         >>> config.merge_cli_config({"timeout": 20})
@@ -62,10 +62,10 @@ class Config:
 
     def __init__(self, project_root: Path):
         """Initialize configuration manager for a project.
-        
+
         Loads configuration from linkguard.config.json and ignore patterns
         from .linkguardignore (or .gitignore files as fallback).
-        
+
         Args:
             project_root: Root directory of the project to scan.
         """
@@ -77,7 +77,7 @@ class Config:
 
     def _load_config(self) -> None:
         """Load configuration from linkguard.config.json and ignore files.
-        
+
         Loads JSON config if present (merges with defaults), then loads ignore
         patterns from .linkguardignore (priority) or .gitignore files (fallback).
         Silently falls back to defaults on errors.
@@ -90,7 +90,7 @@ class Config:
                     # Merge with default config
                     self.config.update(file_config)
 
-            except (json.JSONDecodeError, PermissionError, IOError) as e:
+            except (json.JSONDecodeError, PermissionError, IOError):
                 # Silently fall back to defaults instead of raising
                 pass
             except Exception:
@@ -119,10 +119,10 @@ class Config:
 
     def _collect_gitignore_patterns(self) -> Set[str]:
         """Recursively collect patterns from all .gitignore files in the project.
-        
+
         Used as a fallback when .linkguardignore doesn't exist. Walks the project
         tree and aggregates all .gitignore patterns.
-        
+
         Returns:
             Set of ignore patterns from all .gitignore files.
         """
@@ -139,17 +139,17 @@ class Config:
 
     def _parse_ignore_file(self, ignore_path: Path) -> Set[str]:
         """Parse a .gitignore or .linkguardignore file.
-        
+
         Extracts patterns from file, skipping comments and empty lines.
         Strips trailing slashes from directory patterns and handles
         negation patterns (for future enhancements).
-        
+
         Args:
             ignore_path: Path to the ignore file.
-        
+
         Returns:
             Set of ignore patterns.
-        
+
         Raises:
             ValueError: If file cannot be read.
         """
@@ -183,13 +183,13 @@ class Config:
 
     def merge_cli_config(self, cli_config: Dict[str, Any]) -> None:
         """Merge command line configuration with existing config.
-        
+
         CLI arguments override config file values. Ignore patterns are
         merged (union) rather than replaced to preserve file-based patterns.
-        
+
         Args:
             cli_config: Dictionary of CLI argument overrides.
-        
+
         Example:
             >>> config.merge_cli_config({"mode": "prod", "timeout": 20})
         """
@@ -204,11 +204,11 @@ class Config:
 
     def get(self, key: str, default: Optional[Any] = None) -> Any:
         """Get a configuration value with optional default.
-        
+
         Args:
             key: Configuration key to retrieve.
             default: Value to return if key not found.
-        
+
         Returns:
             Configuration value or default.
         """
@@ -216,18 +216,18 @@ class Config:
 
     def should_ignore_path(self, file_path: Path) -> bool:
         """Check if a given path matches any ignore patterns.
-        
+
         Uses fnmatch for glob-style pattern matching. Checks patterns against:
         - Individual path components (for directory matching)
         - Full path string
         - Filename only
-        
+
         Args:
             file_path: Path to check against ignore patterns.
-        
+
         Returns:
             True if path should be ignored, False otherwise.
-        
+
         Example:
             >>> config.should_ignore_path(Path("dist/bundle.js"))
             True  # if "dist" is in ignore patterns
@@ -259,16 +259,16 @@ class Config:
 
     def should_exclude_url(self, url: str) -> bool:
         """Check if a URL matches any exclusion patterns.
-        
+
         Uses fnmatch for glob-style pattern matching. Useful for excluding
         known problematic domains or internal URLs from validation.
-        
+
         Args:
             url: URL string to check.
-        
+
         Returns:
             True if URL matches any exclude pattern, False otherwise.
-        
+
         Example:
             >>> config.should_exclude_url("https://example.com/test")
             True  # if "*example.com*" in exclude_urls
@@ -283,19 +283,21 @@ class Config:
 
     def get_ignore_patterns(self) -> List[str]:
         """Get the list of ignore patterns.
-        
+
         Returns:
             List of file/directory patterns to exclude from scanning.
         """
-        return self.config.get("ignore_patterns", [])
+        patterns = self.config.get("ignore_patterns", [])
+        return list(patterns) if patterns else []
 
     def get_exclude_urls(self) -> List[str]:
         """Get the list of excluded URL patterns.
-        
+
         Returns:
             List of URL patterns to skip during validation.
         """
-        return self.config.get("exclude_urls", [])
+        urls = self.config.get("exclude_urls", [])
+        return list(urls) if urls else []
 
     def __repr__(self) -> str:
         return f"Config({self.config})"
@@ -303,18 +305,18 @@ class Config:
 
 def load_config(project_root: Path, cli_overrides: Optional[Dict[str, Any]] = None) -> Config:
     """Factory function to load configuration with optional CLI overrides.
-    
+
     Creates a Config instance for the project and applies CLI argument
     overrides if provided. This is the recommended way to create Config
     objects in the CLI application.
-    
+
     Args:
         project_root: Root directory of the project to scan.
         cli_overrides: Optional dictionary of CLI arguments to override config.
-    
+
     Returns:
         Configured Config instance with all sources merged.
-    
+
     Example:
         >>> config = load_config(
         ...     Path("/my/project"),
