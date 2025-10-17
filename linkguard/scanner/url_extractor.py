@@ -209,11 +209,11 @@ class URLExtractor:
             'https://example.com'
         """
         # If it's already an absolute URL (http/https/ftp/etc), return as-is
-        if url.startswith(('http://', 'https://', 'ftp://', 'file://', '//')):
+        if url.startswith(("http://", "https://", "ftp://", "file://", "//")):
             return url
 
         # If it's an absolute path (starts with /), return as file:// URL
-        if url.startswith('/'):
+        if url.startswith("/"):
             abs_path = Path(url)
             if abs_path.exists():
                 return f"file:///{abs_path.as_posix()}"

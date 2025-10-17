@@ -252,11 +252,11 @@ class LinkChecker:
 
                     # Exponential backoff: 2^attempt seconds (1s, 2s, 4s)
                     if attempt < self.max_retries:
-                        await asyncio.sleep(2 ** attempt)
+                        await asyncio.sleep(2**attempt)
                     continue
 
                 except Exception as e:
-                    last_error = e
+                    last_error = e  # type: ignore[assignment]
                     # Don't retry on unexpected errors
                     response_time = asyncio.get_event_loop().time() - start_time
                     return LinkResult(
@@ -325,11 +325,11 @@ class LinkChecker:
                         line_number=url_info.get("line_number"),
                     )
                 # Exponential backoff
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
                 continue
 
             except aiohttp.ClientError as e:
-                last_error = e
+                last_error = e  # type: ignore[assignment]
                 if attempt == self.max_retries:
                     response_time = asyncio.get_event_loop().time() - start_time
                     return LinkResult(
@@ -342,7 +342,7 @@ class LinkChecker:
                         line_number=url_info.get("line_number"),
                     )
                 # Exponential backoff
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(2**attempt)
                 continue
 
             except Exception as e:

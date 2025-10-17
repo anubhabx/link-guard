@@ -5,8 +5,12 @@ import sys
 from typing import Optional, Dict, Any, List, Tuple
 from rich.console import Console
 from rich.progress import (
-    Progress, TextColumn, BarColumn, TaskProgressColumn,
-    TimeRemainingColumn, SpinnerColumn
+    Progress,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+    TimeRemainingColumn,
+    SpinnerColumn,
 )
 from rich.table import Table
 from rich.panel import Panel
@@ -18,9 +22,9 @@ if sys.platform == "win32":
     os.environ.setdefault("PYTHONIOENCODING", "utf-8")
     # Reconfigure stdout/stderr for current process if available (Python 3.7+)
     if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
+        sys.stdout.reconfigure(encoding="utf-8")
     if hasattr(sys.stderr, "reconfigure"):
-        sys.stderr.reconfigure(encoding="utf-8")  # type: ignore
+        sys.stderr.reconfigure(encoding="utf-8")
 
 from linkguard.scanner.file_scanner import FileScanner
 from linkguard.scanner.url_extractor import URLExtractor
@@ -47,8 +51,7 @@ def version_callback(value: bool):
     """Print version and exit."""
     if value:
         console.print(
-            f"[bold cyan]LinkGuard[/bold cyan] version "
-            f"[bold green]{__version__}[/bold green]"
+            f"[bold cyan]LinkGuard[/bold cyan] version " f"[bold green]{__version__}[/bold green]"
         )
         raise typer.Exit()
 
@@ -81,19 +84,11 @@ def scan(
         help="Comma-separated list of glob patterns to ignore",
     ),
     resolve_relative: bool = typer.Option(
-        False,
-        "--resolve-relative",
-        help="Resolve relative file paths to absolute file:// URLs"
+        False, "--resolve-relative", help="Resolve relative file paths to absolute file:// URLs"
     ),
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Enable verbose output"
-    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
     version: Optional[bool] = typer.Option(
-        None,
-        "--version",
-        callback=version_callback,
-        is_eager=True,
-        help="Show version and exit"
+        None, "--version", callback=version_callback, is_eager=True, help="Show version and exit"
     ),
 ) -> None:
     """Scan directory for broken links and environment violations."""
@@ -149,56 +144,46 @@ def scan(
 
     if verbose:
         if config.get_ignore_patterns():
-            patterns = ', '.join(config.get_ignore_patterns())
+            patterns = ", ".join(config.get_ignore_patterns())
             logger.info(f"[yellow]Ignoring patterns:[/yellow] {patterns}")
         if resolve_relative:
             logger.info("[yellow]Relative URL resolution:[/yellow] enabled")
 
     # Scan for files with loading indicator
-    with console.status(
-        "[bold cyan]Scanning for files...[/bold cyan]", spinner="dots"
-    ):
-        scanner = FileScanner(
-            dir_path, ignore_patterns=set(config.get_ignore_patterns())
-        )
+    with console.status("[bold cyan]Scanning for files...[/bold cyan]", spinner="dots"):
+        scanner = FileScanner(dir_path, ignore_patterns=set(config.get_ignore_patterns()))
         files = scanner.scan()
 
     console.print(
-        f"[bold green]✓[/bold green] Found [bold cyan]{len(files)}[/bold cyan] "
-        "files to scan"
+        f"[bold green]✓[/bold green] Found [bold cyan]{len(files)}[/bold cyan] " "files to scan"
     )
 
     # Extract URLs from files with progress indicator
     extractor = URLExtractor(resolve_relative=resolve_relative)
     all_urls: List[Tuple[Path, Dict[str, Any]]] = []
 
-    with console.status(
-        "[bold cyan]Extracting URLs from files...[/bold cyan]", spinner="dots"
-    ):
+    with console.status("[bold cyan]Extracting URLs from files...[/bold cyan]", spinner="dots"):
         for file in files:
             urls = extractor.extract_from_file(file)
             if urls:
                 all_urls.extend([(file, url) for url in urls])
 
     console.print(
-        f"[bold green]✓[/bold green] Extracted [bold cyan]{len(all_urls)}[/bold cyan] "
-        "URLs"
+        f"[bold green]✓[/bold green] Extracted [bold cyan]{len(all_urls)}[/bold cyan] " "URLs"
     )
 
     if verbose:
         if files:
-            file_names = ', '.join(f.name for f in files[:5])
-            suffix = '...' if len(files) > 5 else ''
+            file_names = ", ".join(f.name for f in files[:5])
+            suffix = "..." if len(files) > 5 else ""
             console.print(f"[dim]  Files: {file_names}{suffix}[/dim]")
         if all_urls:
             # Group URLs by file for cleaner logging
-            file_url_counts = {}
+            file_url_counts: Dict[Path, int] = {}
             for file_path, url_info in all_urls:
                 file_url_counts[file_path] = file_url_counts.get(file_path, 0) + 1
             url_items = list(file_url_counts.items())[:3]
-            url_summary = ", ".join(
-                f"{path.name}({count})" for path, count in url_items
-            )
+            url_summary = ", ".join(f"{path.name}({count})" for path, count in url_items)
             if len(file_url_counts) > 3:
                 url_summary += "..."
             console.print(f"[dim]  URLs per file: {url_summary}[/dim]")
@@ -232,9 +217,7 @@ def scan(
     console.print("[bold blue]» Checking links...[/bold blue]\n")
 
     checker = LinkChecker(
-        timeout=final_timeout,
-        max_concurrent=final_concurrency,
-        max_retries=max_retries
+        timeout=final_timeout, max_concurrent=final_concurrency, max_retries=max_retries
     )
 
     with Progress(
@@ -260,13 +243,10 @@ def scan(
             if verbose and completed <= len(all_urls):
                 # Log at 25%, 50%, 75%, 100% or first 2 URLs
                 total = len(all_urls)
-                milestones = [
-                    int(total * 0.25), int(total * 0.5),
-                    int(total * 0.75), total
-                ]
+                milestones = [int(total * 0.25), int(total * 0.5), int(total * 0.75), total]
                 if completed <= 2 or completed in milestones:
                     current_file, current_url_data = all_urls[completed - 1]
-                    url = current_url_data['url']
+                    url = current_url_data["url"]
                     # Truncate long URLs
                     display_url = url if len(url) <= 60 else url[:57] + "..."
                     msg = f"[dim]  [{completed}/{len(all_urls)}] {display_url}[/dim]"
@@ -282,7 +262,8 @@ def scan(
     # Calculate average response time for working links
     avg_response_time = (
         sum(r.response_time for r in working_links if r.response_time) / len(working_links)
-        if working_links else 0
+        if working_links
+        else 0
     )
 
     # Show summary table with enhanced styling
@@ -309,9 +290,7 @@ def scan(
 
     # Show broken links details with better formatting
     if broken_links:
-        console.print(
-            f"[bold red]✗ Found {len(broken_links)} broken link(s):[/bold red]\n"
-        )
+        console.print(f"[bold red]✗ Found {len(broken_links)} broken link(s):[/bold red]\n")
         for i, result in enumerate(broken_links[:15], 1):  # Show first 15
             # Determine error display
             error_msg = result.error or f"HTTP {result.status_code}"
@@ -334,10 +313,7 @@ def scan(
         )
         console.print(msg)
     elif working_links:
-        msg = (
-            f"\n[bold green]✓ {len(working_links)} link(s) working correctly"
-            "[/bold green]"
-        )
+        msg = f"\n[bold green]✓ {len(working_links)} link(s) working correctly" "[/bold green]"
         console.print(msg)
 
     # Export results if requested
@@ -359,9 +335,7 @@ def scan(
             elif extension == ".csv":
                 Exporter.export_to_csv(results, violations, export_path)
             elif extension in {".md", ".markdown"}:
-                Exporter.export_to_markdown(
-                    results, violations, export_path, metadata
-                )
+                Exporter.export_to_markdown(results, violations, export_path, metadata)
             else:
                 console.print(
                     f"[yellow]:white_exclamation_mark:[/yellow] "
@@ -372,8 +346,7 @@ def scan(
                 return
 
             console.print(
-                f"\n[bold green]✓ Results exported to:[/bold green] "
-                f"[cyan]{export_path}[/cyan]"
+                f"\n[bold green]✓ Results exported to:[/bold green] " f"[cyan]{export_path}[/cyan]"
             )
             if verbose:
                 logger.info(f"[green]Export format:[/green] {extension}")
@@ -383,12 +356,9 @@ def scan(
     # Exit with appropriate code
     if violations and final_mode == "prod":
         console.print(
-            "\n[bold yellow]⚠ Environment violations detected in "
-            "production mode![/bold yellow]"
+            "\n[bold yellow]⚠ Environment violations detected in " "production mode![/bold yellow]"
         )
-        console.print(
-            "[dim]These URLs should not be used in production:[/dim]\n"
-        )
+        console.print("[dim]These URLs should not be used in production:[/dim]\n")
         for i, v in enumerate(violations[:5], 1):
             console.print(
                 f"  {i}. [yellow]{v.url}[/yellow]\n"
@@ -408,8 +378,7 @@ def scan(
         raise typer.Exit(code=1)
 
     console.print(
-        "\n[bold green]✓ Scan completed successfully - all links are working!"
-        "[/bold green]"
+        "\n[bold green]✓ Scan completed successfully - all links are working!" "[/bold green]"
     )
     raise typer.Exit(code=0)
 
