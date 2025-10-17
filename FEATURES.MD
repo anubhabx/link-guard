@@ -206,7 +206,7 @@
 - [x] Created `.linkguardignore.example` and `linkguard.config.json.example`
 - [x] Created RELEASE_NOTES.md
 - [x] Streamlined README.md with doc references
-- [x] Updated version to 1.0 across all files
+- [x] Updated version to 1.0.1 across all files
 - [x] Built v1.0 packages (source + wheel)
 - [x] Published to TestPyPI
 - [x] Changed project status to Production/Stable

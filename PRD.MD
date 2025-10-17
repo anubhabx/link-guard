@@ -1,6 +1,6 @@
 # 🛡️ LinkGuard - Product Requirements Document
 
-**Version:** 1.0  
+**Version:** 1.0.1  
 **Last Updated:** 2025-10-15  
 **Status:** Production Release (v1.0)  
 **Owner:** Development Team

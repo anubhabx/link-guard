@@ -94,7 +94,7 @@ class LinkChecker:
         "Cache-Control": "max-age=0",
     }
 
-    def __init__(self, timeout: int = 10, max_concurrent: int = 50) -> None:
+    def __init__(self, timeout: int = 10, max_concurrent: int = 50, max_retries: int = 2) -> None:
         """Initialize the LinkChecker.
 
         Args:
@@ -102,6 +102,8 @@ class LinkChecker:
             max_concurrent: Maximum concurrent requests (default: 50)
                 Higher values = faster but more resource intensive
                 Recommended range: 10-200
+            max_retries: Maximum number of retry attempts for failed requests (default: 2)
+                Uses exponential backoff: 1s, 2s, 4s between retries
 
         Note:
             Setting max_concurrent too high may overwhelm servers
@@ -110,6 +112,7 @@ class LinkChecker:
         """
         self.timeout: int = timeout
         self.max_concurrent: int = max_concurrent
+        self.max_retries: int = max_retries
 
     async def check_links(
         self,
@@ -187,7 +190,13 @@ class LinkChecker:
         file_path: Union[Path, str],
         url_info: Dict[str, Any],
     ) -> LinkResult:
-        """Check a single URL and return Results
+        """Check a single URL with retry logic and return Results.
+
+        Implements exponential backoff retry strategy:
+        - Retry 0: immediate
+        - Retry 1: 1 second delay
+        - Retry 2: 2 second delay
+        - Retry 3: 4 second delay
 
         Args:
             session: Session Client
@@ -203,21 +212,94 @@ class LinkChecker:
 
         async with semaphore:
             start_time = asyncio.get_event_loop().time()
+            last_error = None
 
+            # Retry loop with exponential backoff
+            for attempt in range(self.max_retries + 1):
+                try:
+                    # Use HEAD request first (faster), fall back to GET if needed
+                    async with session.head(
+                        url,
+                        allow_redirects=True,
+                    ) as response:
+                        response_time = asyncio.get_event_loop().time() - start_time
+
+                        # Some servers return 403/405 for HEAD but work with GET
+                        # If HEAD fails with 4xx, try GET as fallback
+                        if response.status in {403, 405, 501}:
+                            return await self._check_with_get(
+                                session, url, file_path, url_info, start_time
+                            )
+
+                        return LinkResult(
+                            url=url,
+                            status_code=response.status,
+                            is_broken=response.status >= 400,
+                            error=None,
+                            response_time=response_time,
+                            file_path=str(file_path),
+                            line_number=url_info.get("line_number"),
+                        )
+
+                except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                    last_error = e
+                    # If this was the last attempt or it's a 4xx/5xx error from HEAD,
+                    # try GET as fallback
+                    if attempt == self.max_retries:
+                        return await self._check_with_get(
+                            session, url, file_path, url_info, start_time
+                        )
+
+                    # Exponential backoff: 2^attempt seconds (1s, 2s, 4s)
+                    if attempt < self.max_retries:
+                        await asyncio.sleep(2 ** attempt)
+                    continue
+
+                except Exception as e:
+                    last_error = e
+                    # Don't retry on unexpected errors
+                    response_time = asyncio.get_event_loop().time() - start_time
+                    return LinkResult(
+                        url=url,
+                        status_code=None,
+                        is_broken=True,
+                        error=f"Unexpected error: {str(e)[:50]}",
+                        response_time=response_time,
+                        file_path=str(file_path),
+                        line_number=url_info.get("line_number"),
+                    )
+
+            # Should not reach here, but handle just in case
+            response_time = asyncio.get_event_loop().time() - start_time
+            return LinkResult(
+                url=url,
+                status_code=None,
+                is_broken=True,
+                error=f"Failed after {self.max_retries} retries: {str(last_error)[:50]}",
+                response_time=response_time,
+                file_path=str(file_path),
+                line_number=url_info.get("line_number"),
+            )
+
+    async def _check_with_get(
+        self,
+        session: aiohttp.ClientSession,
+        url: str,
+        file_path: Union[Path, str],
+        url_info: Dict[str, Any],
+        start_time: float,
+    ) -> LinkResult:
+        """Fallback to GET request if HEAD fails, with retry logic."""
+        last_error = None
+
+        # Retry loop with exponential backoff
+        for attempt in range(self.max_retries + 1):
             try:
-                # Use HEAD request first (faster), fall back to GET if needed
-                async with session.head(
+                async with session.get(
                     url,
                     allow_redirects=True,
                 ) as response:
                     response_time = asyncio.get_event_loop().time() - start_time
-
-                    # Some servers return 403/405 for HEAD but work with GET
-                    # If HEAD fails with 4xx, try GET as fallback
-                    if response.status in {403, 405, 501}:
-                        return await self._check_with_get(
-                            session, url, file_path, url_info, start_time
-                        )
 
                     return LinkResult(
                         url=url,
@@ -229,11 +311,42 @@ class LinkChecker:
                         line_number=url_info.get("line_number"),
                     )
 
-            except (aiohttp.ClientError, asyncio.TimeoutError):
-                # If HEAD request fails, try GET as fallback
-                return await self._check_with_get(session, url, file_path, url_info, start_time)
+            except asyncio.TimeoutError as e:
+                last_error = e
+                if attempt == self.max_retries:
+                    response_time = asyncio.get_event_loop().time() - start_time
+                    return LinkResult(
+                        url=url,
+                        status_code=None,
+                        is_broken=True,
+                        error=f"Timeout after {self.max_retries} retries",
+                        response_time=response_time,
+                        file_path=str(file_path),
+                        line_number=url_info.get("line_number"),
+                    )
+                # Exponential backoff
+                await asyncio.sleep(2 ** attempt)
+                continue
+
+            except aiohttp.ClientError as e:
+                last_error = e
+                if attempt == self.max_retries:
+                    response_time = asyncio.get_event_loop().time() - start_time
+                    return LinkResult(
+                        url=url,
+                        status_code=None,
+                        is_broken=True,
+                        error=f"Connection error after {self.max_retries} retries: {str(e)[:50]}",
+                        response_time=response_time,
+                        file_path=str(file_path),
+                        line_number=url_info.get("line_number"),
+                    )
+                # Exponential backoff
+                await asyncio.sleep(2 ** attempt)
+                continue
 
             except Exception as e:
+                # Don't retry on unexpected errors
                 response_time = asyncio.get_event_loop().time() - start_time
                 return LinkResult(
                     url=url,
@@ -245,64 +358,14 @@ class LinkChecker:
                     line_number=url_info.get("line_number"),
                 )
 
-    async def _check_with_get(
-        self,
-        session: aiohttp.ClientSession,
-        url: str,
-        file_path: Union[Path, str],
-        url_info: Dict[str, Any],
-        start_time: float,
-    ) -> LinkResult:
-        """Fallback to GET request if HEAD fails."""
-        try:
-            async with session.get(
-                url,
-                allow_redirects=True,
-            ) as response:
-                response_time = asyncio.get_event_loop().time() - start_time
-
-                return LinkResult(
-                    url=url,
-                    status_code=response.status,
-                    is_broken=response.status >= 400,
-                    error=None,
-                    response_time=response_time,
-                    file_path=str(file_path),
-                    line_number=url_info.get("line_number"),
-                )
-
-        except asyncio.TimeoutError:
-            response_time = asyncio.get_event_loop().time() - start_time
-            return LinkResult(
-                url=url,
-                status_code=None,
-                is_broken=True,
-                error="Timeout",
-                response_time=response_time,
-                file_path=str(file_path),
-                line_number=url_info.get("line_number"),
-            )
-
-        except aiohttp.ClientError as e:
-            response_time = asyncio.get_event_loop().time() - start_time
-            return LinkResult(
-                url=url,
-                status_code=None,
-                is_broken=True,
-                error=f"Connection error: {str(e)[:50]}",
-                response_time=response_time,
-                file_path=str(file_path),
-                line_number=url_info.get("line_number"),
-            )
-
-        except Exception as e:
-            response_time = asyncio.get_event_loop().time() - start_time
-            return LinkResult(
-                url=url,
-                status_code=None,
-                is_broken=True,
-                error=f"Unexpected error: {str(e)[:50]}",
-                response_time=response_time,
-                file_path=str(file_path),
-                line_number=url_info.get("line_number"),
-            )
+        # Should not reach here, but handle just in case
+        response_time = asyncio.get_event_loop().time() - start_time
+        return LinkResult(
+            url=url,
+            status_code=None,
+            is_broken=True,
+            error=f"Failed after {self.max_retries} retries: {str(last_error)[:50]}",
+            response_time=response_time,
+            file_path=str(file_path),
+            line_number=url_info.get("line_number"),
+        )

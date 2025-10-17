@@ -6,7 +6,7 @@ from different file types including Markdown, HTML, JSON, and JavaScript files.
 
 import re
 from pathlib import Path
-from typing import List, Dict, Any, Final, Set, Tuple
+from typing import List, Dict, Any, Final, Set, Tuple, Optional
 from bs4 import BeautifulSoup
 import json
 
@@ -23,13 +23,23 @@ class URLExtractor:
     Attributes:
         URL_PATTERN: Compiled regex for matching HTTP/HTTPS URLs
         MD_LINK_PATTERN: Compiled regex for Markdown link syntax
+        resolve_relative: Whether to resolve relative file paths to absolute file:// URLs
 
     Example:
-        >>> extractor = URLExtractor()
+        >>> extractor = URLExtractor(resolve_relative=True)
         >>> urls = extractor.extract_from_file(Path("README.md"))
         >>> for url_info in urls:
         ...     print(f"{url_info['url']} at line {url_info['line_number']}")
     """
+
+    def __init__(self, resolve_relative: bool = False) -> None:
+        """Initialize the URLExtractor.
+
+        Args:
+            resolve_relative: If True, resolve relative URLs (e.g., ../docs/api.md)
+                to absolute file:// URLs. Default is False for backward compatibility.
+        """
+        self.resolve_relative = resolve_relative
 
     # URL regex pattern - matches http:// or https:// URLs
     # Modified to exclude trailing punctuation and capture complete URLs
@@ -113,8 +123,16 @@ class URLExtractor:
                 md_matches = self.MD_LINK_PATTERN.findall(line)
 
                 for text, url in md_matches:
-                    # Only include URLs starting with http:// or https://
-                    if url.startswith(("http://", "https://")):
+                    # Resolve relative URLs if enabled
+                    if self.resolve_relative:
+                        resolved_url = self._resolve_relative_url(file_path, url)
+                        if resolved_url is None:
+                            # Relative path doesn't exist, skip it
+                            continue
+                        url = resolved_url
+
+                    # Only include URLs starting with http://, https://, or file://
+                    if url.startswith(("http://", "https://", "file://")):
                         # Clean URL and create unique key
                         clean_url = self._clean_url(url)
                         url_key = (clean_url, line_num)
@@ -169,6 +187,53 @@ class URLExtractor:
         """
         # Remove trailing ), ., ,, ;, etc.
         return url.rstrip(".,;:)")
+
+    def _resolve_relative_url(self, base_file_path: Path, url: str) -> Optional[str]:
+        """Resolve relative URLs to absolute file:// URLs.
+
+        Converts relative file paths (e.g., ../docs/api.md, ./config.json)
+        to absolute file:// URLs if the file exists on disk.
+
+        Args:
+            base_file_path: Path to the file containing the URL
+            url: The URL to resolve (can be relative or absolute)
+
+        Returns:
+            Absolute file:// URL if relative path exists, original URL if absolute,
+            or None if relative path doesn't exist
+
+        Example:
+            >>> extractor._resolve_relative_url(Path("/project/docs/api.md"), "../README.md")
+            'file:///project/README.md'
+            >>> extractor._resolve_relative_url(Path("/project/docs/api.md"), "https://example.com")
+            'https://example.com'
+        """
+        # If it's already an absolute URL (http/https/ftp/etc), return as-is
+        if url.startswith(('http://', 'https://', 'ftp://', 'file://', '//')):
+            return url
+
+        # If it's an absolute path (starts with /), return as file:// URL
+        if url.startswith('/'):
+            abs_path = Path(url)
+            if abs_path.exists():
+                return f"file:///{abs_path.as_posix()}"
+            return None
+
+        # Try to resolve relative path
+        try:
+            # Resolve relative to the directory containing the source file
+            resolved = (base_file_path.parent / url).resolve()
+
+            # Check if the resolved path exists
+            if resolved.exists():
+                # Convert to file:// URL with forward slashes
+                return f"file:///{resolved.as_posix()}"
+            else:
+                # Path doesn't exist, return None to skip it
+                return None
+        except (ValueError, OSError):
+            # Invalid path, return None
+            return None
 
     def _extract_from_html(self, file_path: Path) -> List[Dict[str, Any]]:
         """Extract URLs from HTML files using BeautifulSoup.

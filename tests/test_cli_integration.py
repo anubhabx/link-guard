@@ -26,6 +26,7 @@ def test_cli_scan_basic(temp_project):
         [sys.executable, "-m", "linkguard.cli", str(temp_project)],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=30,
         cwd=temp_project,  # Run from temp directory
     )
@@ -46,6 +47,7 @@ def test_cli_scan_with_mode_prod(temp_project):
         [sys.executable, "-m", "linkguard.cli", str(temp_project), "--mode", "prod"],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=30,
         cwd=temp_project,
     )
@@ -66,6 +68,7 @@ def test_cli_scan_with_export_json(temp_project):
         [sys.executable, "-m", "linkguard.cli", str(temp_project), "--export", str(export_path)],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=30,
         cwd=temp_project,
     )
@@ -95,6 +98,7 @@ def test_cli_scan_with_timeout(temp_project):
         [sys.executable, "-m", "linkguard.cli", str(temp_project), "--timeout", "1"],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=30,
         cwd=temp_project,
     )
@@ -119,6 +123,7 @@ def test_cli_scan_with_ignore_pattern(temp_project):
         ],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=30,
         cwd=temp_project,
     )
@@ -140,6 +145,7 @@ def test_cli_scan_nonexistent_directory(tmp_path):
         [sys.executable, "-m", "linkguard.cli", str(nonexistent)],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=10,
         cwd=tmp_path,
     )
@@ -155,6 +161,7 @@ def test_cli_scan_with_verbose(temp_project):
         [sys.executable, "-m", "linkguard.cli", str(temp_project), "--verbose"],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=30,
         cwd=temp_project,
     )
@@ -170,6 +177,7 @@ def test_cli_scan_empty_directory(tmp_path):
         [sys.executable, "-m", "linkguard.cli", str(tmp_path)],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=10,
         cwd=tmp_path,
     )
@@ -188,6 +196,7 @@ def test_cli_help_command():
         [sys.executable, "-m", "linkguard.cli", "--help"],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=10,
     )
 
@@ -201,6 +210,7 @@ def test_cli_version_implicit():
         [sys.executable, "-m", "linkguard.cli", "--help"],
         capture_output=True,
         text=True,
+        encoding='utf-8',
         timeout=10,
     )
 

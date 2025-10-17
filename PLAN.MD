@@ -1,7 +1,7 @@
 # 📋 LinkGuard Development Plan
 
 > **Last Updated**: October 15, 2025  
-> **Current Version**: v1.0 (Production Release)  
+> **Current Version**: v1.0.1 (Production Release)  
 > **Current Phase**: Phase 7 - Complete | Next: v1.1.0 Planning
 
 ---

@@ -2,7 +2,7 @@
 
 **For developers working on LinkGuard - Updated October 15, 2025**
 
-**Current Version:** v1.0 (Production Release)
+**Current Version:** v1.0.1 (Production Release)
 
 ---
 
@@ -349,5 +349,5 @@ with Progress(...) as progress:
 ---
 
 **Last Updated:** October 15, 2025  
-**Current Version:** v1.0 (Production Release)  
+**Current Version:** v1.0.1 (Production Release)  
 **Next Milestone:** v1.1.0 (Enhanced Features - Retry Logic, Custom Headers, Relative URLs)
