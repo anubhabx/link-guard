@@ -1,6 +1,7 @@
 """
 Additional tests to improve code coverage for edge cases.
 """
+
 import pytest
 import asyncio
 import aiohttp
@@ -296,9 +297,7 @@ def test_config_gitignore_generic_exception(tmp_path):
     gitignore.write_text("*.log")
 
     # Mock _parse_ignore_file to raise exception
-    with patch.object(
-        Config, "_parse_ignore_file", side_effect=Exception("Parse error")
-    ):
+    with patch.object(Config, "_parse_ignore_file", side_effect=Exception("Parse error")):
         config = Config(root)
         patterns = config.get_ignore_patterns()
         # Should continue without the problematic .gitignore
